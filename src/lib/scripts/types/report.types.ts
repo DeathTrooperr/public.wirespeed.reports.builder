@@ -1,3 +1,5 @@
+export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFORMATIONAL';
+
 export interface CaseSeverity {
     critical: number;
     high: number;
@@ -33,7 +35,7 @@ export interface EscalatedCase {
     id: string;
     sid: string;
     title: string;
-    severity: string;
+    severity: Severity;
     status: string;
     createdAt: string;
     response: string;
@@ -41,6 +43,7 @@ export interface EscalatedCase {
 
 export interface ReportData {
     companyName: string;
+    reportType: string;
     reportPeriod: string;
     executiveSummary: string;
     

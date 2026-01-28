@@ -2,7 +2,7 @@
     import Report from '$lib/components/pages/home/Report.svelte';
     import type { ReportData } from '$lib/scripts/types/report.types.js';
 
-    let apiKey = $state('');
+    let apiKey = $state('apiKey');
     let periodType = $state<'monthly' | 'quarterly' | 'yearly' | 'all-time' | 'custom'>('monthly');
     let selectedMonth = $state(new Date().toISOString().slice(0, 7));
     let selectedYear = $state(new Date().getFullYear());
@@ -11,7 +11,7 @@
     let customEnd = $state('');
     let errorMessage = $state('');
 
-    const dateRange = $derived(() => {
+    const dateRange = $derived.by(() => {
         let start = '';
         let end = '';
         
@@ -44,7 +44,7 @@
         return { start, end };
     });
 
-    const periodLabel = $derived(() => {
+    const periodLabel = $derived.by(() => {
         switch (periodType) {
             case 'monthly':
                 if (selectedMonth) {
@@ -76,7 +76,6 @@
 
         isGenerating = true;
         errorMessage = '';
-        const { start, end } = dateRange();
         
         try {
             const response = await fetch('/api/report/generate', {
@@ -86,9 +85,9 @@
                 },
                 body: JSON.stringify({ 
                     apiKey, 
-                    startDate: start, 
-                    endDate: end, 
-                    customPeriod: periodLabel() 
+                    startDate: dateRange.start, 
+                    endDate: dateRange.end, 
+                    customPeriod: periodLabel 
                 })
             });
 

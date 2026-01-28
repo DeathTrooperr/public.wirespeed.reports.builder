@@ -1,65 +1,85 @@
-# Svelte library
+# Wirespeed Security Operations Reports
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+A professional security report generator for Wirespeed Managed Detection & Response (MDR). This tool generates comprehensive, high-fidelity A4 security operations reports directly from the Wirespeed API, optimized for both digital viewing and high-quality printing.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## 🚀 Features
 
-## Creating a project
+- **Automated Data Retrieval**: Integrates directly with the Wirespeed API to fetch real-time security telemetry.
+- **Professional Layout**: Precision-engineered A4 document structure with automatic page breaking and consistent headers/footers.
+- **Comprehensive Reporting Sections**:
+    - **Executive Summary**: High-level overview of security posture and service coverage.
+    - **Detection Analysis**: Detailed breakdown of alert processing pipelines and funnel metrics.
+    - **MDR Activity**: Chronological list of escalated cases with severity levels and response summaries.
+    - **Asset Intelligence**: Endpoint OS distribution and identity-based attack analysis.
+    - **Data Ingestion**: Visual representation of telemetry sources and event volumes.
+- **Flexible Timeframes**: Support for Monthly, Quarterly, Yearly, and Custom reporting periods.
+- **Print-Ready**: Optimized CSS for pixel-perfect PDF export and physical printing.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## 🛠 Tech Stack
 
-```sh
-# create a new project in the current directory
-npx sv create
+- **Framework**: [Svelte 5](https://svelte.dev) (using Runes for state management)
+- **Meta-framework**: [SvelteKit](https://kit.svelte.dev)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
+- **Deployment**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Language**: TypeScript
 
-# create a new project in my-app
-npx sv create my-app
-```
+## 🏁 Getting Started
 
-To recreate this project with the same configuration:
+### Prerequisites
 
-```sh
-# recreate this project
-npx sv create --template library --types ts --add prettier eslint tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:cloudflare+cfTarget:workers" devtools-json --install npm snowy-rain-afbe
-```
+- Node.js (v20 or later recommended)
+- A Wirespeed API Key
 
-## Developing
+### Installation
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-org/WirespeedReports.git
+   cd WirespeedReports
+   ```
 
-```sh
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Development
+
+Start the development server:
+```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+Open your browser to `http://localhost:5173`. You can enter your Wirespeed API key in the sidebar to preview reports with live data.
 
-## Building
+### Deployment
 
-To build your library:
+This project is configured for deployment on Cloudflare Workers using `@sveltejs/adapter-cloudflare`.
 
-```sh
-npm pack
-```
+1. Authenticate with Wrangler:
+   ```bash
+   npx wrangler login
+   ```
 
-To create a production version of your showcase app:
+2. Deploy the application:
+   ```bash
+   npm run deploy
+   ```
 
-```sh
-npm run build
-```
+## 📄 Usage
 
-You can preview the production build with `npm run preview`.
+1. **Enter API Key**: Provide your Wirespeed API key in the configuration sidebar.
+2. **Select Period**: Choose between monthly, quarterly, yearly, or custom date ranges.
+3. **Generate**: Click "Generate Report" to fetch data and render the live preview.
+4. **Print/Save**: Use the "Print / Download" button to save the report as a PDF using your browser's print functionality. For best results, ensure "Background Graphics" is enabled in your print settings.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## 🏗 Project Structure
 
-## Publishing
+- `src/lib/server/wirespeed`: API client and data fetching logic.
+- `src/lib/components/pages/home/layout`: Core document structure components (Header, Footer, Section wrappers).
+- `src/lib/components/pages/home/reportPages`: Individual report page implementations.
+- `src/routes/api/report/generate`: Backend endpoint for data aggregation and sanitization.
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+---
 
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+Built with ❤️ by a Wirespeed user.

@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
-import type { ReportData } from '$lib/scripts/types/report.types.js';
+import type { EscalatedCase, ReportData, Severity } from '$lib/scripts/types/report.types.js';
 import type {
 	Case,
+	Detections,
 	TeamOCSFStatistic,
 	TeamStatisticsLocation,
 	TeamStatisticsOperatingSystem
@@ -21,7 +22,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const api = new WirespeedApi(apiKey);
 		const days = 30; // Default timeframe
 
-		const [team, stats, severityStats, mttr, mttd, mttv, cases] = await Promise.all([
+		const startDate = new Date();
+		startDate.setDate(startDate.getDate() - days);
+		const startDateString = startDate.toISOString();
+
+		const [team, stats, severityStats, mttr, mttd, mttv, cases, detections] = await Promise.all([
 			api.getCurrentTeam(),
 			api.getTeamStatistics(days),
 			api.getCasesStatsBySeverity(days),
@@ -31,8 +36,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			api.getCases({
 				size: 10,
 				orderBy: 'createdAt',
-				orderDir: 'desc',
-				onlyWasEscalated: true
+				orderDir: 'desc'
+			}),
+			api.getDetections({
+				createdAt: {
+					gte: startDateString
+				}
 			})
 		]);
 
@@ -65,8 +74,53 @@ export const POST: RequestHandler = async ({ request }) => {
 				.trim();
 		};
 
+		const endpointsMap: Record<string, number> = {};
+		const identitiesMap: Record<string, number> = {};
+
+		detections.data.forEach((d) => {
+			const ocsf = d.ocsfDetectionFinding || {};
+
+			// Extract endpoint
+			const endpoint =
+				ocsf.device?.hostname ||
+				ocsf.device?.name ||
+				d.raw?.device?.hostname ||
+				d.raw?.device?.name ||
+				d.raw?.endpoint?.hostname ||
+				d.raw?.endpoint?.name;
+
+			if (endpoint && typeof endpoint === 'string') {
+				endpointsMap[endpoint] = (endpointsMap[endpoint] || 0) + 1;
+			}
+
+			// Extract identity
+			const identity =
+				ocsf.user?.name ||
+				ocsf.user?.email_addr ||
+				d.raw?.user?.name ||
+				d.raw?.user?.email_addr ||
+				d.raw?.user?.email ||
+				d.raw?.identity?.name ||
+				d.raw?.identity?.email;
+
+			if (identity && typeof identity === 'string') {
+				identitiesMap[identity] = (identitiesMap[identity] || 0) + 1;
+			}
+		});
+
+		const mostAttackedEndpoints = Object.entries(endpointsMap)
+			.map(([name, count]) => ({ name, count }))
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 5);
+
+		const mostAttackedIdentities = Object.entries(identitiesMap)
+			.map(([name, count]) => ({ name, count }))
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 5);
+
 		const report: ReportData = {
 			companyName: team.name,
+			reportType: 'Monthly',
 			reportPeriod: `Last ${days} Days`,
 			executiveSummary:
 				`During the time frame of this report, Wirespeed analyzed ${totalEvents.toLocaleString()} events from ${stats.billableEndpoints} ` +
@@ -105,13 +159,13 @@ export const POST: RequestHandler = async ({ request }) => {
 				confirmedMalicious: stats.confirmedMalicious,
 				truePositives: stats.truePositiveDetections,
 				truePositivesPercent:
-					stats.totalDetections > 0
-						? `${((stats.truePositiveDetections / stats.totalDetections) * 100).toFixed(2)}%`
+					stats.escalatedDetections > 0
+						? `${((stats.truePositiveDetections / stats.escalatedDetections) * 100).toFixed(2)}%`
 						: '0%',
 				falsePositives: stats.falsePositiveDetections,
 				falsePositivesPercent:
-					stats.totalDetections > 0
-						? `${((stats.falsePositiveDetections / stats.totalDetections) * 100).toFixed(2)}%`
+					stats.escalatedDetections > 0
+						? `${((stats.falsePositiveDetections / stats.escalatedDetections) * 100).toFixed(2)}%`
 						: '0%'
 			},
 
@@ -138,17 +192,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				count: o.count
 			})),
 
-			mostAttackedEndpoints: [
-				{ name: 'WS-PRD-DB01', count: 12 },
-				{ name: 'WS-STG-APP02', count: 8 },
-				{ name: 'WS-DEV-WEB01', count: 5 }
-			],
-
-			mostAttackedIdentities: [
-				{ name: 'srmullaney@wirespeed.co', count: 14 },
-				{ name: 'admin@wirespeed.co', count: 9 },
-				{ name: 'service-acct-01@wirespeed.co', count: 4 }
-			],
+			mostAttackedEndpoints,
+			mostAttackedIdentities,
 
 			meanTimeMetrics: {
 				mttr: formatTimeMetric(mttr),
@@ -176,54 +221,17 @@ export const POST: RequestHandler = async ({ request }) => {
 				count: l.count
 			})),
 
-			escalatedCases: (() => {
-				const mapped: any[] = cases.data.map((c: Case) => ({
+			escalatedCases: ((): EscalatedCase[] => {
+				return cases.data.map((c: Case) => ({
 					id: c.id,
 					sid: c.sid,
 					title: sanitizeText(c.title),
-					severity: c.severity,
+					severity: c.severity as Severity,
 					status: c.status,
 					createdAt: c.createdAt,
-					response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed SOC.')
+					response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed MDR.')
 				}));
-
-				// Ensure there are at least 10 cases for the report presentation
-				if (mapped.length < 10) {
-					const fillerCount = 10 - mapped.length;
-					const fillers = [
-						{ title: 'Suspicious PowerShell Execution', severity: 'HIGH' },
-						{ title: 'Brute Force Attempt Detected', severity: 'MEDIUM' },
-						{ title: 'External Connection to Known Malicious IP', severity: 'CRITICAL' },
-						{ title: 'Unauthorized Sensitive File Access', severity: 'HIGH' },
-						{ title: 'Anomalous Data Exfiltration Attempt', severity: 'CRITICAL' },
-						{ title: 'Credential Dumping Tool Detected', severity: 'HIGH' },
-						{ title: 'Multiple Failed Login Attempts', severity: 'LOW' },
-						{ title: 'Potential Lateral Movement Detected', severity: 'MEDIUM' },
-						{ title: 'Phishing Link Clicked - Credential Harvest', severity: 'HIGH' },
-						{ title: 'Abnormal RDP Connection Established', severity: 'MEDIUM' }
-					];
-
-					for (let i = 0; i < fillerCount; i++) {
-						const filler = fillers[i % fillers.length];
-						mapped.push({
-							id: `filler-${i}`,
-							sid: `WS-${1000 + i}`,
-							title: filler.title,
-							severity: filler.severity,
-							status: 'CLOSED',
-							createdAt: new Date().toISOString(),
-							response:
-								'Identified and mitigated via automated containment playbooks. SOC validated integrity of the affected asset.'
-						});
-					}
-				}
-				return mapped;
 			})(),
-			recommendations: [
-				'Implement multi-factor authentication across all external-facing applications.',
-				'Review and restrict administrative privileges on high-value endpoints.',
-				'Ensure all critical security patches are applied within 48 hours of release.'
-			]
 		};
 
 		return json(report);

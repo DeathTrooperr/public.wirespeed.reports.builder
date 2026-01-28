@@ -260,7 +260,7 @@ export interface Case {
 	externalTicketId?: string;
 	externalTicketIntegrationId?: string;
 	autoContained: boolean;
-	severity: string;
+	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 	severityOrdinal: number;
 	respondedAt?: string;
 	platforms?: string[];
@@ -272,6 +272,145 @@ export interface Case {
 
 export interface Cases {
 	data: Case[];
+	totalCount: number;
+}
+
+export interface DateFilterDto {
+	gt?: string;
+	gte?: string;
+	lt?: string;
+	lte?: string;
+}
+
+export interface SearchDetectionsDto {
+	size?: number;
+	page?: number;
+	filter?: string;
+	search?: string;
+	orderBy?: string;
+	orderDir?: 'asc' | 'desc';
+	caseIdOrSid?: string;
+	statuses?: string[];
+	verdict?: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	assetId?: string;
+	assetType?:
+		| 'USER'
+		| 'PROCESS'
+		| 'USER_AGENT'
+		| 'FILE'
+		| 'ENDPOINT'
+		| 'LOCATION'
+		| 'IP'
+		| 'DOMAIN';
+	hideExcluded?: boolean;
+	onlyChatOps?: boolean;
+	onlyWasEscalated?: boolean;
+	onlyWasContained?: boolean;
+	hideDemoClients?: boolean;
+	categoryClass?:
+		| 'ENDPOINT'
+		| 'IDENTITY'
+		| 'CLOUD'
+		| 'EMAIL'
+		| 'NETWORK'
+		| 'DATA'
+		| 'POSTURE'
+		| 'OTHER';
+	category?: string;
+	exclusionId?: string;
+	severity?: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+	integrationPlatform?: string;
+	createdAt?: DateFilterDto;
+}
+
+export interface VerdictRule {
+	id: string;
+	stage: 'TRIAGE' | 'HUNT' | 'MONITOR';
+	default: boolean;
+	managedByWspd: boolean;
+	category: string;
+	wspdRule: string;
+	retired: boolean;
+	escalate: boolean;
+	chatOps: boolean;
+	close: boolean;
+	disabled: boolean;
+	containUser: boolean;
+	containEndpoint: boolean;
+	chatOpsMFA: boolean;
+	monitor: boolean;
+	monitorFallbackPreset?: 'ESCALATE' | 'ESCALATE_CONTAIN' | 'CLOSE';
+	managerChatOps: boolean;
+	vipChatOps: boolean;
+	createdAt: string;
+	updatedAt: string;
+	teamId: string;
+	chatOpsTimeoutVerdict?: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	chatOpsTimeoutMonitor?: boolean;
+	chatOpsUnsureVerdict: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	verdict?: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	description: string;
+	managedByParent?: boolean;
+	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+	useSourceSeverity?: boolean;
+}
+
+export interface Detection {
+	id: string;
+	teamId: string;
+	teamName?: string;
+	sourceDescription?: string;
+	notes?: string;
+	sourceName?: string;
+	description?: string;
+	status: 'NEW' | 'PROCESSING' | 'ESCALATED' | 'HUNTING' | 'MONITORING' | 'CHATOPS' | 'CLOSED';
+	createdAt: string;
+	containments: string[];
+	testMode: boolean;
+	caseId?: string;
+	sourceIngestedAt: string;
+	sourceDetectedAt: string;
+	verdictedAt?: string;
+	updatedAt?: string;
+	closedAt?: string;
+	logs: JSONLog[];
+	raw: Record<string, any>;
+	verdict: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	title: string;
+	integrationPlatform: string;
+	integrationId?: string;
+	duplicateDetectionId?: string;
+	contained: boolean;
+	nextSteps?: string;
+	reingested: boolean;
+	prevented: boolean;
+	excludeFromMeans: boolean;
+	caseSid?: string;
+	sid: string;
+	firstRun: boolean;
+	containOnChatOpsFailure: boolean;
+	wasEscalated: boolean;
+	ocsfDetectionFinding: Record<string, any>;
+	actionSlug?: string;
+	exclusionId?: string;
+	exclusionSid?: string;
+	autoClosed?: boolean;
+	autoContained?: boolean;
+	category: string;
+	verdictSetting?: VerdictRule;
+	chatOpsTest: boolean;
+	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+	severityOrdinal: number;
+	containsVIP: boolean;
+	containsHVA: boolean;
+	excluded: boolean;
+	chatOpsTestEmail?: string;
+	chatOpsTestPhoneNumber?: string;
+	customDetectionId?: string;
+}
+
+export interface Detections {
+	data: Detection[];
 	totalCount: number;
 }
 
@@ -367,6 +506,16 @@ export class WirespeedApi {
 	 */
 	async getCases(query: SearchCasesDto): Promise<Cases> {
 		return this.request<Cases>('/cases', {
+			method: 'POST',
+			body: JSON.stringify(query)
+		});
+	}
+
+	/**
+	 * Search and list detections
+	 */
+	async getDetections(query: SearchDetectionsDto): Promise<Detections> {
+		return this.request<Detections>('/detection', {
 			method: 'POST',
 			body: JSON.stringify(query)
 		});
