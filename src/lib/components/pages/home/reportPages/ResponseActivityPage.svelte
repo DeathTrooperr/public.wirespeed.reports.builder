@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { ReportData, EscalatedCase } from '$lib/scripts/types/report.types.js';
+    import ReportPage from '../layout/ReportPage.svelte';
     import ReportSection from '../layout/ReportSection.svelte';
 
     let { data, chunk, index, totalCasePages, totalPages }: { 
@@ -11,16 +12,12 @@
     } = $props();
 
     const confirmationRate = Math.round((Number(data.verdictAccuracy.confirmedMalicious) / (Number(data.verdictAccuracy.verdictedMalicious) || 1)) * 100);
-    
-    const accentBg = 'bg-accent';
 </script>
 
-<ReportSection 
-    headerTitle="Response Activity" 
+<ReportPage 
     pageNumber={4 + index} 
-    {totalPages} 
-    reportType={data.reportType}
-    mt="mt-0"
+    {totalPages}
+    reportPeriodLabel={data.reportPeriodLabel}
 >
     {#if index === 0}
     <ReportSection title="Verdict Accuracy" isMain={true}>
@@ -140,9 +137,9 @@
                             <td class="py-3 px-4">
                                 <div class="flex flex-col gap-2">
                                     <p class="text-[10px] text-foreground/60 leading-relaxed italic font-medium">
-                                        "{item.response.length > 150 ? item.response.slice(0, 150) + '...' : item.response}"
+                                        "{item.response.length > 300 ? item.response.slice(0, 300) + '...' : item.response}"
                                     </p>
-                                    {#if item.response.length > 150}
+                                    {#if item.response.length > 300}
                                         <a 
                                             href="https://app.wirespeed.co/cases/{item.id}"
                                             target="_blank"
@@ -178,4 +175,4 @@
         </div>
         {/if}
     </ReportSection>
-</ReportSection>
+</ReportPage>

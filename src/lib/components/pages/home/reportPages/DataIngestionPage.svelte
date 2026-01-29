@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { ReportData } from '$lib/scripts/types/report.types.js';
+    import ReportPage from '../layout/ReportPage.svelte';
     import ReportSection from '../layout/ReportSection.svelte';
 
     let { data, pageNumber, totalPages }: { data: ReportData, pageNumber: number, totalPages: number } = $props();
@@ -11,14 +12,16 @@
     );
 </script>
 
-<ReportSection 
-    title="Ingestion Architecture" 
-    headerTitle="Data Ingestion" 
-    isMain={true} 
+<ReportPage 
     {pageNumber} 
-    {totalPages} 
-    reportType={data.reportType}
+    {totalPages}
+    reportPeriodLabel={data.reportPeriodLabel}
 >
+    <ReportSection 
+        title="Ingestion Architecture" 
+        isMain={true}
+        flexGrow={true}
+    >
     <!-- BAR GRAPH -->
     <div class="bg-white border border-gray-100 rounded-3xl p-8 mb-6 shadow-sm relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
@@ -75,7 +78,7 @@
                             <div class="flex-grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                 <div 
                                     class="h-full bg-primary/20 rounded-full transition-all duration-1000 group-hover:bg-primary/40" 
-                                    style="width: {(item.countValue / (data.eventsByIntegration[0]?.countValue || 1)) * 100}%"
+                                    style="width: {(item.countValue / data.funnelData.total) * 100}%"
                                 ></div>
                             </div>
                             <span class="text-[8px] font-black text-foreground/30 w-10 text-right uppercase tracking-tighter">{item.processed}</span>
@@ -85,4 +88,5 @@
             {/each}
         </div>
     </div>
-</ReportSection>
+    </ReportSection>
+</ReportPage>

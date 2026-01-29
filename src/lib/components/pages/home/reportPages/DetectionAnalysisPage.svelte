@@ -1,17 +1,15 @@
 <script lang="ts">
     import type { ReportData } from '$lib/scripts/types/report.types.js';
+    import ReportPage from '../layout/ReportPage.svelte';
     import ReportSection from '../layout/ReportSection.svelte';
 
     let { data, totalPages }: { data: ReportData, totalPages: number } = $props();
-    const accentBg = 'bg-accent';
 </script>
 
-<ReportSection 
-    headerTitle="Detection Analysis" 
+<ReportPage 
     pageNumber={3} 
-    {totalPages} 
-    reportType={data.reportType}
-    mt="mt-0"
+    {totalPages}
+    reportPeriodLabel={data.reportPeriodLabel}
 >
     <ReportSection title="Detection Analysis" isMain={true}>
         <div class="grid grid-cols-3 gap-6 mb-6">
@@ -35,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="bg-gray-50/50 border border-gray-100 rounded-3xl p-8 text-primary relative overflow-hidden">
+            <div class="bg-gray-50/50 border border-gray-100 rounded-3xl p-6 text-primary relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32"></div>
                 <h3 class="text-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
                     <span class="w-8 h-px bg-primary/30"></span>
@@ -152,7 +150,7 @@
             </div>
         </ReportSection>
 
-        <ReportSection title="Historical Simulation (Test Mode)">
+        <ReportSection title="Historical Simulation (Test Mode)" mt="mt-6">
             <div class="grid grid-cols-3 gap-6">
                 <div class="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-3xl transition-transform group-hover:scale-110"></div>
@@ -174,4 +172,4 @@
                 </div>
             </div>
         </ReportSection>
-</ReportSection>
+</ReportPage>

@@ -3,28 +3,38 @@ import type { RequestHandler } from './$types.js';
 import type { EscalatedCase, ReportData, Severity } from '$lib/scripts/types/report.types.js';
 import type {
 	Case,
-	Detections,
 	TeamOCSFStatistic,
 	TeamStatisticsLocation,
 	TeamStatisticsOperatingSystem
-} from '$lib/server/wirespeed/api.js';
+} from '$lib/server/types/wirespeed.types.js';
 import { WirespeedApi } from '$lib/server/wirespeed/api.js';
+import sanitizeHtml from 'sanitize-html';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const body = (await request.json()) as { apiKey?: string };
-		const { apiKey } = body;
+		const body = (await request.json()) as {
+			apiKey?: string
+			timeframe: {
+				startDate: string,
+				endDate: string,
+				periodLabel: string
+			}
+		};
+		const { apiKey, timeframe } = body;
+		const { startDate, endDate, periodLabel } = timeframe;
 
 		if (!apiKey) {
 			return json({ error: 'API key is required' }, { status: 400 });
 		}
 
 		const api = new WirespeedApi(apiKey);
-		const days = 30; // Default timeframe
+		const start = new Date(startDate);
+		const end = new Date(endDate);
+		const startDateString = start.toISOString();
 
-		const startDate = new Date();
-		startDate.setDate(startDate.getDate() - days);
-		const startDateString = startDate.toISOString();
+		// Calculate days between dates for API calls
+		const diffTime = Math.abs(end.getTime() - start.getTime());
+		const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
 		const [team, stats, severityStats, mttr, mttd, mttv, cases, detections] = await Promise.all([
 			api.getCurrentTeam(),
@@ -34,16 +44,22 @@ export const POST: RequestHandler = async ({ request }) => {
 			api.getMttd(days),
 			api.getMttv(days),
 			api.getCases({
-				size: 10,
 				orderBy: 'createdAt',
-				orderDir: 'desc'
+				orderDir: 'desc',
+				createdAt: {
+					gte: startDateString
+				}
 			}),
 			api.getDetections({
+				orderBy: 'createdAt',
+				orderDir: 'desc',
 				createdAt: {
 					gte: startDateString
 				}
 			})
 		]);
+
+		const detectionAssets = await Promise.all(detections.data.map((d) => api.getAssetsByDetectionId(d.id)));
 
 		const formatTimeMetric = (metric: { average: number | string; unit: string }) => {
 			const avg = typeof metric.average === 'string' ? parseFloat(metric.average) : metric.average;
@@ -68,8 +84,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const sanitizeText = (text: string) => {
 			if (!text) return '';
-			return text
-				.replace(/<[^>]*>?/gm, '') // Strip HTML tags
+			return sanitizeHtml(text, {
+				allowedTags: [],
+				allowedAttributes: {}
+			})
 				.replace(/\s+/g, ' ') // Normalize whitespace
 				.trim();
 		};
@@ -77,35 +95,17 @@ export const POST: RequestHandler = async ({ request }) => {
 		const endpointsMap: Record<string, number> = {};
 		const identitiesMap: Record<string, number> = {};
 
-		detections.data.forEach((d) => {
-			const ocsf = d.ocsfDetectionFinding || {};
-
-			// Extract endpoint
-			const endpoint =
-				ocsf.device?.hostname ||
-				ocsf.device?.name ||
-				d.raw?.device?.hostname ||
-				d.raw?.device?.name ||
-				d.raw?.endpoint?.hostname ||
-				d.raw?.endpoint?.name;
-
-			if (endpoint && typeof endpoint === 'string') {
-				endpointsMap[endpoint] = (endpointsMap[endpoint] || 0) + 1;
-			}
-
-			// Extract identity
-			const identity =
-				ocsf.user?.name ||
-				ocsf.user?.email_addr ||
-				d.raw?.user?.name ||
-				d.raw?.user?.email_addr ||
-				d.raw?.user?.email ||
-				d.raw?.identity?.name ||
-				d.raw?.identity?.email;
-
-			if (identity && typeof identity === 'string') {
-				identitiesMap[identity] = (identitiesMap[identity] || 0) + 1;
-			}
+		detectionAssets.forEach((assets) => {
+			assets.endpoints.forEach((e) => {
+				const endpoint = e.displayName || e.name;
+				if (endpoint) endpointsMap[endpoint] = (endpointsMap[endpoint] || 0) + 1;
+			});
+			assets.directory.forEach((u) => {
+				const integration = u.integrationId as any;
+				const platform = integration?.platform || '';
+				const identity = u.displayName || u.email;
+				if(identity && u.directoryId) identitiesMap[identity] = (identitiesMap[identity] || 0) + 1;
+			});
 		});
 
 		const mostAttackedEndpoints = Object.entries(endpointsMap)
@@ -120,7 +120,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const report: ReportData = {
 			companyName: team.name,
-			reportType: 'Monthly',
+			reportPeriodLabel: periodLabel,
 			reportPeriod: `Last ${days} Days`,
 			executiveSummary:
 				`During the time frame of this report, Wirespeed analyzed ${totalEvents.toLocaleString()} events from ${stats.billableEndpoints} ` +
@@ -222,7 +222,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			})),
 
 			escalatedCases: ((): EscalatedCase[] => {
-				return cases.data.map((c: Case) => ({
+				return cases.data.slice(0, 10).map((c: Case) => ({
 					id: c.id,
 					sid: c.sid,
 					title: sanitizeText(c.title),
@@ -231,7 +231,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					createdAt: c.createdAt,
 					response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed MDR.')
 				}));
-			})(),
+			})()
 		};
 
 		return json(report);

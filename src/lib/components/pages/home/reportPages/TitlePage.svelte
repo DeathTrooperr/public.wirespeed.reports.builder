@@ -1,16 +1,14 @@
 <script lang="ts">
     import type { ReportData } from '$lib/scripts/types/report.types.js';
-    import ReportSection from '../layout/ReportSection.svelte';
+    import ReportPage from '../layout/ReportPage.svelte';
 
     let { data, totalPages }: { data: ReportData, totalPages: number } = $props();
 </script>
 
-<ReportSection 
-    headerTitle="Security Operations Report" 
+<ReportPage 
     {totalPages} 
-    showFooterDetails={true} 
-    reportType={data.reportType}
-    mt="mt-0"
+    showFooterDetails={true}
+    reportPeriodLabel={data.reportPeriodLabel}
 >
     <div class="flex-grow flex flex-col justify-center px-12">
         <div class="relative">
@@ -49,4 +47,4 @@
             </div>
         </div>
     </div>
-</ReportSection>
+</ReportPage>

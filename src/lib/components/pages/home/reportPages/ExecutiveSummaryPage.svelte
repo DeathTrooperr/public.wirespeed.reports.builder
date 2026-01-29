@@ -1,22 +1,19 @@
 <script lang="ts">
     import type { ReportData } from '$lib/scripts/types/report.types.js';
+    import ReportPage from '../layout/ReportPage.svelte';
     import ReportSection from '../layout/ReportSection.svelte';
 
     let { data, totalPages }: { data: ReportData, totalPages: number } = $props();
-    const accentBg = 'bg-accent';
 </script>
 
-<ReportSection 
-    headerTitle="Report Summary" 
+<ReportPage
     pageNumber={2} 
-    {totalPages} 
-    reportType={data.reportType}
-    mt="mt-0"
+    {totalPages}
+    reportPeriodLabel={data.reportPeriodLabel}
 >
     <ReportSection title="Executive Summary" isMain={true}>
         <div class="relative">
-            <div class="absolute -left-6 top-0 bottom-0 w-1 bg-primary/10 rounded-full"></div>
-            <p class="text-foreground/80 leading-relaxed text-sm whitespace-pre-line pl-6">
+            <p class="text-foreground/80 leading-relaxed text-sm whitespace-pre-line pl-0">
                 {data.executiveSummary}
             </p>
         </div>
@@ -97,4 +94,4 @@
             </div>
         </div>
     </ReportSection>
-</ReportSection>
+</ReportPage>

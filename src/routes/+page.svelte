@@ -2,7 +2,7 @@
     import Report from '$lib/components/pages/home/Report.svelte';
     import type { ReportData } from '$lib/scripts/types/report.types.js';
 
-    let apiKey = $state('apiKey');
+    let apiKey = $state('');
     let periodType = $state<'monthly' | 'quarterly' | 'yearly' | 'all-time' | 'custom'>('monthly');
     let selectedMonth = $state(new Date().toISOString().slice(0, 7));
     let selectedYear = $state(new Date().getFullYear());
@@ -84,10 +84,12 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    apiKey, 
-                    startDate: dateRange.start, 
-                    endDate: dateRange.end, 
-                    customPeriod: periodLabel 
+                    apiKey,
+                    timeframe: {
+                        startDate: dateRange.start,
+                        endDate: dateRange.end,
+                        periodLabel,
+                    }
                 })
             });
 

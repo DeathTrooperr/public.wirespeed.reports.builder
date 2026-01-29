@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { ReportData } from '$lib/scripts/types/report.types.js';
+    import type { ReportData, EscalatedCase } from '$lib/scripts/types/report.types.js';
     import TitlePage from './reportPages/TitlePage.svelte';
     import ExecutiveSummaryPage from './reportPages/ExecutiveSummaryPage.svelte';
     import DetectionAnalysisPage from './reportPages/DetectionAnalysisPage.svelte';
@@ -9,20 +9,66 @@
 
     let { data }: { data: ReportData } = $props();
 
+    function calculateRowHeight(item: EscalatedCase): number {
+        const basePadding = 24; // py-3 (12px) * 2
+        
+        // Incident Column: Title (11px, leading-tight ~14px) + Date (8px)
+        const titleCharsPerLine = 22;
+        const titleLines = Math.ceil(item.title.length / titleCharsPerLine) || 1;
+        const incidentHeight = (titleLines * 14) + 16; // Title + Date + gaps
+
+        // Summary Column: Text (10px, leading-relaxed ~16px)
+        // Note: matching the truncation in ResponseActivityPage
+        const summaryLimit = 300; 
+        const summaryText = item.response.length > summaryLimit ? item.response.slice(0, summaryLimit) + '...' : item.response;
+        const summaryCharsPerLine = 55;
+        const summaryLines = Math.ceil(summaryText.length / summaryCharsPerLine) || 1;
+        let summaryHeight = (summaryLines * 16);
+        if (item.response.length > summaryLimit) summaryHeight += 20; // Details link + gap
+
+        return basePadding + Math.max(incidentHeight, summaryHeight, 32);
+    }
+
     let caseChunks = $derived((() => {
-        const chunks = [];
+        const chunks: EscalatedCase[][] = [];
         const cases = data.escalatedCases;
-        console.log(cases);
         if (cases.length === 0) return [[]];
         
-        // First page can fit fewer cases because of Verdict Integrity
-        const firstPageCount = 4;
-        const otherPageCount = 6;
-        
-        chunks.push(cases.slice(0, firstPageCount));
-        
-        for (let i = firstPageCount; i < cases.length; i += otherPageCount) {
-            chunks.push(cases.slice(i, i + otherPageCount));
+        const PAGE_HEIGHT = 800; // Available height in pixels
+        const VERDICT_ACCURACY_HEIGHT = 320;
+        const TABLE_HEADER_HEIGHT = 60;
+        const QA_NOTE_HEIGHT = 100;
+
+        let currentPage: EscalatedCase[] = [];
+        let currentHeight = 0;
+        let isFirstPage = true;
+
+        for (let i = 0; i < cases.length; i++) {
+            const item = cases[i];
+            const rowHeight = calculateRowHeight(item);
+            
+            let availableHeight = PAGE_HEIGHT - TABLE_HEADER_HEIGHT;
+            if (isFirstPage) {
+                availableHeight -= VERDICT_ACCURACY_HEIGHT;
+            }
+
+            // If it's the last item, we need to ensure the QA note fits
+            const isLastItem = i === cases.length - 1;
+            const extraHeightNeeded = isLastItem ? QA_NOTE_HEIGHT : 0;
+
+            if (currentPage.length > 0 && (currentHeight + rowHeight + extraHeightNeeded > availableHeight)) {
+                chunks.push(currentPage);
+                currentPage = [item];
+                currentHeight = rowHeight;
+                isFirstPage = false;
+            } else {
+                currentPage.push(item);
+                currentHeight += rowHeight;
+            }
+        }
+
+        if (currentPage.length > 0) {
+            chunks.push(currentPage);
         }
         
         return chunks;

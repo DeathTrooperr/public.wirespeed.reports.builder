@@ -43,7 +43,7 @@ export interface EscalatedCase {
 
 export interface ReportData {
     companyName: string;
-    reportType: string;
+    reportPeriodLabel: string;
     reportPeriod: string;
     executiveSummary: string;
     
@@ -99,5 +99,4 @@ export interface ReportData {
     casesBySeverity: CaseSeverity;
     suspiciousLoginLocations: CountryDetection[];
     escalatedCases: EscalatedCase[];
-    recommendations: string[];
 }
