@@ -18,7 +18,7 @@
     } = $props();
 </script>
 
-<div class="a4-page page-break">
+<div class="a4-page page-break bg-linear-to-bl from-primary/5 via-white to-white">
     <ReportHeader {reportPeriodLabel} />
     
     <div class="flex-grow flex flex-col">

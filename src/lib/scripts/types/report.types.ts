@@ -22,8 +22,11 @@ export interface CountryDetection {
 }
 
 export interface EndpointOS {
-    os: string;
-    count: number;
+    windows: number;
+    macos: number;
+    linux: number;
+    mobile: number;
+    other: number;
 }
 
 export interface AttackedAsset {
@@ -78,8 +81,7 @@ export interface ReportData {
     };
     
     eventsByIntegration: IntegrationMetric[];
-    detectionsByCountry: CountryDetection[];
-    endpointsByOS: EndpointOS[];
+    endpointsByOS: EndpointOS;
     mostAttackedEndpoints: AttackedAsset[];
     mostAttackedIdentities: AttackedAsset[];
     

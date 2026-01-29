@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types.js';
-import type { EscalatedCase, ReportData, Severity } from '$lib/scripts/types/report.types.js';
+import type { EscalatedCase, ReportData, Severity, EndpointOS } from '$lib/scripts/types/report.types.js';
 import type {
 	Case,
 	TeamOCSFStatistic,
 	TeamStatisticsLocation,
-	TeamStatisticsOperatingSystem
+	TeamStatisticsOperatingSystem,
 } from '$lib/server/types/wirespeed.types.js';
 import { WirespeedApi } from '$lib/server/wirespeed/api.js';
 import sanitizeHtml from 'sanitize-html';
@@ -123,13 +123,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			reportPeriodLabel: periodLabel,
 			reportPeriod: `Last ${days} Days`,
 			executiveSummary:
-				`During the time frame of this report, Wirespeed analyzed ${totalEvents.toLocaleString()} events from ${stats.billableEndpoints} ` +
-				`endpoints, ${stats.billableUsers} users, and other assets on your network. Of those events, there were ${stats.totalDetections} ` +
-				`events triggered detections through automated rules and analysis. Of these detections Wirespeed & integrated security tools automatically` +
-				`resolved ${stats.automaticallyClosed} detections and escalated ${stats.escalatedDetections} detections to your security team. ` +
-				`Those investigations led to ${Number((stats.chatOpsDetections + stats.containmentDetections))} response actions which were taken to stop further compromise ` +
-				'by your security team. This defense strategy continues to reduce your risk, which maximizes your security and minimizes cyberattack damage to your business.',
-
+				`During the time frame of this report, <strong>Wirespeed analyzed</strong> <strong class="text-primary">${totalEvents.toLocaleString()}</strong> events from <strong class="text-primary">${stats.billableEndpoints}</strong> ` +
+				`<strong>endpoint${Number(stats.billableEndpoints) !== 1 ? 's' : ''}</strong>, <strong class="text-primary">${stats.billableUsers}</strong> <strong>user${Number(stats.billableUsers) !== 1 ? 's' : ''}</strong>, and ` +
+				`<strong>other sources</strong> in your environment. Of those events, <strong class="text-primary">${stats.totalDetections}</strong> <strong> triggered detections</strong> through automated rules and ` +
+				`dynamic analysis. Of those detections, <strong>Wirespeed & integrated security tools</strong> automatically resolved <strong class="text-primary">${stats.automaticallyClosed}</strong> and escalated ` +
+				`<strong class="text-primary">${stats.escalatedDetections}</strong> case to your security team. Those cases led to <strong>${Number((stats.chatOpsDetections + stats.containmentDetections))}</strong> response actions ` +
+				`which were taken to stop further compromise by your security team. This defense strategy continues to reduce your risk, which maximizes your security and minimizes cyberattack damage to your business.`,
 			billableUsers: stats.billableUsers,
 			billableEndpoints: stats.billableEndpoints,
 
@@ -182,15 +181,21 @@ export const POST: RequestHandler = async ({ request }) => {
 				countValue: Number(s.totalEvents)
 			})),
 
-			detectionsByCountry: stats.detectionLocations.map((l: TeamStatisticsLocation) => ({
-				country: l.country,
-				count: l.count
-			})),
+			endpointsByOS: stats.operatingSystems.reduce(
+				(acc, { operatingSystem, count }) => {
+					const name = (operatingSystem ?? '').toLowerCase();
+					const n = Number(count) || 0;
 
-			endpointsByOS: stats.operatingSystems.map((o: TeamStatisticsOperatingSystem) => ({
-				os: o.operatingSystem,
-				count: o.count
-			})),
+					if (name.includes('windows')) acc.windows += n;
+					else if (name.includes('mac')) acc.macos += n;
+					else if (name.includes('linux')) acc.linux += n;
+					else if (['ios', 'android', 'mobile'].some((os) => name.includes(os))) acc.mobile += n;
+					else acc.other += n;
+
+					return acc;
+				},
+				{ windows: 0, macos: 0, linux: 0, mobile: 0, other: 0 } as EndpointOS
+			),
 
 			mostAttackedEndpoints,
 			mostAttackedIdentities,
@@ -216,21 +221,41 @@ export const POST: RequestHandler = async ({ request }) => {
 				informational: severityStats.find((s) => s.severity === 'INFORMATIONAL')?.count ?? 0
 			},
 
-			suspiciousLoginLocations: stats.suspiciousLoginLocations.map((l: TeamStatisticsLocation) => ({
-				country: l.country,
-				count: l.count
-			})),
+			suspiciousLoginLocations: stats.suspiciousLoginLocations
+				.reduce((acc: TeamStatisticsLocation[], l: TeamStatisticsLocation) => {
+					acc.push(l);
+					return acc.sort((a, b) => b.count - a.count).slice(0, 10);
+				}, [])
+				.map((l: TeamStatisticsLocation) => ({
+					country: l.country,
+					count: l.count
+				})),
 
 			escalatedCases: ((): EscalatedCase[] => {
-				return cases.data.slice(0, 10).map((c: Case) => ({
-					id: c.id,
-					sid: c.sid,
-					title: sanitizeText(c.title),
-					severity: c.severity as Severity,
-					status: c.status,
-					createdAt: c.createdAt,
-					response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed MDR.')
-				}));
+				const severityOrder: Record<string, number> = {
+					CRITICAL: 0,
+					HIGH: 1,
+					MEDIUM: 2,
+					LOW: 3,
+					INFORMATIONAL: 4
+				};
+
+				return cases.data
+					.sort((a, b) => {
+						const aOrder = severityOrder[a.severity] ?? 99;
+						const bOrder = severityOrder[b.severity] ?? 99;
+						return aOrder - bOrder;
+					})
+					.slice(0, 10)
+					.map((c: Case) => ({
+						id: c.id,
+						sid: c.sid,
+						title: sanitizeText(c.title),
+						severity: c.severity as Severity,
+						status: c.status,
+						createdAt: c.createdAt,
+						response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed MDR.')
+					}));
 			})()
 		};
 

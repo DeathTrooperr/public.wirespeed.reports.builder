@@ -1,11 +1,11 @@
 <script lang="ts">
     import type { ReportData, EscalatedCase } from '$lib/scripts/types/report.types.js';
-    import TitlePage from './reportPages/TitlePage.svelte';
-    import ExecutiveSummaryPage from './reportPages/ExecutiveSummaryPage.svelte';
-    import DetectionAnalysisPage from './reportPages/DetectionAnalysisPage.svelte';
-    import ResponseActivityPage from './reportPages/ResponseActivityPage.svelte';
-    import AssetIntelligencePage from './reportPages/AssetIntelligencePage.svelte';
-    import DataIngestionPage from './reportPages/DataIngestionPage.svelte';
+    import TitlePage from './reportPages/01-TitlePage.svelte';
+    import ExecutiveSummaryPage from './reportPages/02-ExecutiveSummaryPage.svelte';
+    import DetectionAnalysisPage from './reportPages/03-DetectionAnalysisPage.svelte';
+    import ResponseActivityPage from './reportPages/04-ResponseActivityPage.svelte';
+    import AssetIntelligencePage from './reportPages/05-AssetIntelligencePage.svelte';
+    import DataIngestionPage from './reportPages/06-DataIngestionPage.svelte';
 
     let { data }: { data: ReportData } = $props();
 

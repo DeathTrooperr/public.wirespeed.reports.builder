@@ -14,7 +14,7 @@
     <ReportSection title="Executive Summary" isMain={true}>
         <div class="relative">
             <p class="text-foreground/80 leading-relaxed text-sm whitespace-pre-line pl-0">
-                {data.executiveSummary}
+                {@html data.executiveSummary}
             </p>
         </div>
     </ReportSection>

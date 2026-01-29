@@ -8,7 +8,7 @@
     let topIntegrations = $derived(
         [...data.eventsByIntegration]
             .sort((a, b) => b.countValue - a.countValue)
-            .slice(0, 6)
+            .slice(0, 5)
     );
 </script>
 
@@ -18,7 +18,7 @@
     reportPeriodLabel={data.reportPeriodLabel}
 >
     <ReportSection 
-        title="Ingestion Architecture" 
+        title="Ingestion Breakdown"
         isMain={true}
         flexGrow={true}
     >
