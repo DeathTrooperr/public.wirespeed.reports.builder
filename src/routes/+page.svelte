@@ -702,10 +702,10 @@
                 
                 <div class="p-8 space-y-4">
                     <p class="text-gray-600 leading-relaxed font-medium">
-                        This project is <span class="text-[#6d28d9] font-bold">fully open source</span> and free to use. It is an independent community project and is <span class="font-bold text-gray-900">not affiliated with, endorsed by, or sponsored by <span class="text-[#6d28d9]">Wirespeed</span></span>.
+                        This project is <span class="text-[#6d28d9] font-bold">fully open source</span> and free to use. It is an independent community project and is <span class="font-bold text-gray-900">not affiliated with, endorsed by, or sponsored by <span class="text-[#6d28d9] font-bold">Wirespeed</span></span>.
                     </p>
                     <p class="text-gray-500 text-sm leading-relaxed">
-                        Users connect the project to their own <span class="text-[#6d28d9] font-semibold">Wirespeed</span> instances using their own API keys. This project does not provide, host, or resell any <span class="text-[#6d28d9] font-semibold">Wirespeed</span> services.
+                        Users connect the project to their own <span class="text-[#6d28d9] font-medium">Wirespeed</span> instances using their own API keys. This project does not provide, host, or resell any <span class="text-[#6d28d9] font-medium">Wirespeed</span> services.
                     </p>
                     <p class="text-gray-500 text-sm leading-relaxed">
                         All trademarks, product names, and logos are the property of their respective owners and are used for identification purposes only.

@@ -19,7 +19,7 @@
     <div>
         <div class="flex items-center gap-3 mb-2">
             <p class="text-primary font-black text-xs tracking-tighter">
-                {branding?.spName ? 'Powered by ' : ''}<span class="text-[#6d28d9]">Wirespeed</span>{branding?.spName ? '' : ' by Coalition'}
+                {branding?.spName ? 'Powered by Wirespeed' : 'Wirespeed by Coalition'}
             </p>
         </div>
         {#if showDetails}
@@ -29,9 +29,9 @@
                     <span class="mx-2 opacity-30">|</span> 
                     <a href="mailto:{branding.supportEmail}" class="hover:text-primary transition-colors no-underline">{branding.supportEmail}</a>
                 {:else}
-                    <a href="https://wirespeed.co" class="hover:text-primary transition-colors no-underline"><span class="text-[#6d28d9]">wirespeed</span>.co</a> 
+                    <a href="https://wirespeed.co" class="hover:text-primary transition-colors no-underline">wirespeed.co</a> 
                     <span class="mx-2 opacity-30">|</span> 
-                    <a href="mailto:support@wirespeed.co" class="hover:text-primary transition-colors no-underline">support@<span class="text-[#6d28d9]">wirespeed</span>.co</a>
+                    <a href="mailto:support@wirespeed.co" class="hover:text-primary transition-colors no-underline">support@wirespeed.co</a>
                 {/if}
             </p>
         {:else}
