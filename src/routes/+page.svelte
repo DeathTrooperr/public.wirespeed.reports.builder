@@ -163,6 +163,24 @@
     let reportData: ReportData | null = $state(null);
     let isGenerating = $state(false);
 
+    let showDisclaimer = $state(false);
+
+    $effect(() => {
+        if (typeof window !== 'undefined') {
+            const dismissed = localStorage.getItem('wirespeed-disclaimer-dismissed');
+            if (!dismissed) {
+                showDisclaimer = true;
+            }
+        }
+    });
+
+    function dismissDisclaimer() {
+        showDisclaimer = false;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('wirespeed-disclaimer-dismissed', 'true');
+        }
+    }
+
     let lastFetchedKey = '';
     async function fetchTeams() {
         if (!apiKey || apiKey === lastFetchedKey) return;
@@ -662,6 +680,52 @@
             <path d="M9 18c-4.51 2-5-2-7-2"/>
         </svg>
     </a>
+
+    <!-- Disclaimer Popup -->
+    {#if showDisclaimer}
+        <div 
+            transition:fade={{ duration: 200 }}
+            class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden"
+        >
+            <div 
+                class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300"
+            >
+                <div class="bg-[#6d28d9] p-6 text-white relative">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                    <div class="relative z-10 flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <h3 class="text-xl font-black uppercase tracking-tight">Open Source & Third-Party Disclaimer</h3>
+                    </div>
+                </div>
+                
+                <div class="p-8 space-y-4">
+                    <p class="text-gray-600 leading-relaxed font-medium">
+                        This project is <span class="text-[#6d28d9] font-bold">fully open source</span> and free to use. It is an independent community project and is <span class="font-bold text-gray-900">not affiliated with, endorsed by, or sponsored by <span class="text-[#6d28d9]">Wirespeed</span></span>.
+                    </p>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Users connect the project to their own <span class="text-[#6d28d9] font-semibold">Wirespeed</span> instances using their own API keys. This project does not provide, host, or resell any <span class="text-[#6d28d9] font-semibold">Wirespeed</span> services.
+                    </p>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        All trademarks, product names, and logos are the property of their respective owners and are used for identification purposes only.
+                    </p>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        The complete source code is available at the GitHub link in the lower right corner. Self-hosting and deploying your own instance is encouraged for regular or production use.
+                    </p>
+                    
+                    <div class="pt-4">
+                        <button 
+                            onclick={dismissDisclaimer}
+                            class="w-full bg-[#6d28d9] text-white font-black py-4 rounded-xl hover:bg-[#6d28d9]/90 active:scale-[0.98] transition-all uppercase tracking-widest text-sm"
+                        >
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>

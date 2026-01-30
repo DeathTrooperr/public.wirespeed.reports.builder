@@ -123,10 +123,10 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
         reportPeriod: `Last ${days} Days`,
         branding,
         executiveSummary:
-            `During the time frame of this report, <strong>Wirespeed analyzed</strong> <strong class="text-primary">${totalEvents.toLocaleString()}</strong> events from <strong class="text-primary">${stats.billableEndpoints}</strong> ` +
+            `During the time frame of this report, <strong class="text-[#6d28d9]">Wirespeed analyzed</strong> <strong class="text-primary">${totalEvents.toLocaleString()}</strong> events from <strong class="text-primary">${stats.billableEndpoints}</strong> ` +
             `<strong>endpoint${Number(stats.billableEndpoints) !== 1 ? 's' : ''}</strong>, <strong class="text-primary">${stats.billableUsers}</strong> <strong>user${Number(stats.billableUsers) !== 1 ? 's' : ''}</strong>, and ` +
             `<strong>other sources</strong> in your environment. Of those events, <strong class="text-primary">${stats.totalDetections}</strong> <strong> triggered detections</strong> through automated rules and ` +
-            `dynamic analysis. Of those detections, <strong>Wirespeed & integrated security tools</strong> automatically resolved <strong class="text-primary">${stats.automaticallyClosed}</strong> and escalated ` +
+            `dynamic analysis. Of those detections, <strong class="text-[#6d28d9]">Wirespeed & integrated security tools</strong> automatically resolved <strong class="text-primary">${stats.automaticallyClosed}</strong> and escalated ` +
             `<strong class="text-primary">${stats.escalatedDetections}</strong> case to your security team. Those cases led to <strong>${Number((stats.chatOpsDetections + stats.containmentDetections))}</strong> response actions ` +
             `which were taken to stop further compromise by your security team. This defense strategy continues to reduce your risk, which maximizes your security and minimizes cyberattack damage to your business.`,
         billableUsers: stats.billableUsers,
