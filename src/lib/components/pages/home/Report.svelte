@@ -5,8 +5,8 @@
     import DetectionAnalysisPage from './reportPages/03-DetectionAnalysisPage.svelte';
     import ResponseActivityPage from './reportPages/04-ResponseActivityPage.svelte';
     import AssetIntelligencePage from './reportPages/05-AssetIntelligencePage.svelte';
-    import DarkWebReportPage from './reportPages/DarkWebReportPage.svelte';
-    import DataIngestionPage from './reportPages/06-DataIngestionPage.svelte';
+    import DarkWebReportPage from './reportPages/06-DarkWebReportPage.svelte';
+    import DataIngestionPage from './reportPages/07-DataIngestionPage.svelte';
 
     let { data }: { data: ReportData } = $props();
 

@@ -76,7 +76,7 @@
                 <div>
                     <h4 class="text-xs font-black text-primary uppercase tracking-wider mb-1">Analyst Note</h4>
                     <p class="text-[11px] text-foreground/70 leading-relaxed italic">
-                        Our dark web monitoring system continuously scans encrypted networks, paste sites, and underground forums for mentions of your corporate domain and employee credentials. Any high-risk findings are immediately triaged by our SOC team.
+                        Our dark web monitoring system continuously scans encrypted networks, paste sites, and underground forums for mentions of your corporate domain and employee credentials. Any high-risk findings are immediately triaged by our MDR system.
                     </p>
                 </div>
             </div>
