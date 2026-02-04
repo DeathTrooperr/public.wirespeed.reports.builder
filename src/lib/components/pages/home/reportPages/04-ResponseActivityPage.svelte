@@ -168,11 +168,20 @@
         </div>
 
         {#if index === totalCasePages - 1}
-        <div class="mt-6 flex items-start gap-4 p-4 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-            <p class="text-[10px] text-foreground/50 leading-relaxed font-medium">
-                <span class="font-black text-primary uppercase tracking-[0.2em] mr-2">MDR Quality Assurance:</span>
-                All verdicts undergo a secondary review process to ensure precision in detection logic and minimize organizational friction. Our current confirmation rate reflects Wirespeed's commitment to high-fidelity alerting and continuous improvement of automated response playbooks.
-            </p>
+        <div class="mt-8 p-6 bg-primary/5 rounded-2xl border border-primary/10">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black text-primary uppercase tracking-wider mb-1">MDR Quality Assurance</h4>
+                    <p class="text-[11px] text-foreground/70 leading-relaxed italic">
+                        All verdicts undergo a secondary review process to ensure precision in detection logic and minimize organizational friction. Our current confirmation rate reflects Wirespeed's commitment to high-fidelity alerting and continuous improvement of automated response playbooks.
+                    </p>
+                </div>
+            </div>
         </div>
         {/if}
     </ReportSection>

@@ -42,7 +42,7 @@
 <!-- Inline header change px-12 to px-[20mm] -->
 <header class="bg-primary -mx-[20mm] -mt-[20mm] h-20 flex items-center px-12 relative overflow-hidden shrink-0">
     <div class="flex items-center gap-6 z-10 w-full">
-        <div class="flex items-center justify-center h-10 w-[150px] shrink-0">
+        <div class="flex items-center justify-center h-max w-[150px] shrink-0">
             <img 
                 src={activeLogo} 
                 alt={branding?.spName || 'Platform Logo'} 

@@ -69,7 +69,7 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
-    const [team, stats, severityStats, mttr, mttd, mttv, mttc, cases, detections] = await Promise.all([
+    const [team, stats, severityStats, mttr, mttd, mttv, mttc, cases, detections, privateCredentialCases, publicCredentialCases] = await Promise.all([
         api.getCurrentTeam(),
         api.getTeamStatistics(days),
         api.getCasesStatsBySeverity(days),
@@ -86,8 +86,25 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
             orderBy: 'createdAt',
             orderDir: 'desc',
             createdAt: { gte: startDateString }
+        }),
+        api.getCases({
+            orderBy: 'createdAt',
+            orderDir: 'desc',
+            createdAt: { gte: startDateString },
+            category: 'IDENTITY__PRIVATE_CREDENTIAL_EXPOSURE'
+        }),
+        api.getCases({
+            orderBy: 'createdAt',
+            orderDir: 'desc',
+            createdAt: { gte: startDateString },
+            category: 'IDENTITY__PUBLIC_CREDENTIAL_EXPOSURE'
         })
     ]);
+
+    const credentialCases = {
+        data: [...privateCredentialCases.data, ...publicCredentialCases.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        totalCount: privateCredentialCases.totalCount + publicCredentialCases.totalCount
+    };
 
     const detectionAssets = await Promise.all(detections.data.map((d) => api.getAssetsByDetectionId(d.id)));
 
@@ -257,7 +274,19 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
                     createdAt: c.createdAt,
                     response: sanitizeText(c.summary || c.notes || 'Investigated and triaged by Wirespeed MDR.')
                 }));
-        })()
+        })(),
+
+        darkWebReport: {
+            totalExposures: credentialCases.totalCount,
+            highRiskExposures: credentialCases.data.filter(c => c.severity === 'HIGH' || c.severity === 'CRITICAL').length,
+            compromisedAccounts: credentialCases.data.length, // Each case is typically an exposure
+            recentLeaks: credentialCases.data.slice(0, 5).map(c => ({
+                date: new Date(c.createdAt).toISOString().slice(0, 10),
+                source: c.platforms?.[0] || 'Web Leak',
+                type: c.title,
+                severity: (c.severity === 'CRITICAL' || c.severity === 'HIGH') ? 'HIGH' : (c.severity === 'MEDIUM' ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW'
+            }))
+        }
     };
 
     return report;

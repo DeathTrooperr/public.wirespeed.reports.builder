@@ -94,7 +94,7 @@
                             <!-- Data Labels & Values -->
                             <!-- Ingested -->
                             <g transform="translate(130, 40)">
-                                <text y="-10" text-anchor="middle" class="fill-foreground/60 text-[9px] font-black uppercase tracking-[0.2em]">Ingested</text>
+                                <text y="-10" text-anchor="middle" class="fill-foreground/60 text-[9px] font-black uppercase tracking-[0.2em]">Ingested Events</text>
                                 <text y="18" text-anchor="middle" class="fill-primary text-[24px] font-black tracking-tighter">{data.funnelData.total.toLocaleString()}</text>
                             </g>
 
@@ -112,7 +112,7 @@
 
                             <!-- Responded -->
                             <g transform="translate(130, 235)">
-                                <text y="-10" text-anchor="middle" class="fill-white/80 text-[9px] font-black uppercase tracking-[0.2em]">Responded</text>
+                                <text y="-10" text-anchor="middle" class="fill-white/80 text-[9px] font-black uppercase tracking-[0.2em]">Responce</text>
                                 <text y="18" text-anchor="middle" class="fill-white text-[24px] font-black tracking-tighter">{data.funnelData.responded}</text>
                             </g>
                         </svg>
@@ -121,7 +121,7 @@
                     <div class="flex-1 space-y-3">
                         <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-1 h-full bg-primary/20"></div>
-                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Escalated</p>
+                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Escalated Cases</p>
                             <div class="flex items-baseline gap-4">
                                 <p class="text-2xl font-black text-primary tracking-tighter">{data.detections.escalated}</p>
                                 <div class="flex items-center gap-2">
@@ -132,7 +132,7 @@
                         </div>
                         <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-1 h-full bg-primary/20"></div>
-                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Chat Ops</p>
+                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Chat Ops Cases</p>
                             <div class="flex items-baseline gap-4">
                                 <p class="text-2xl font-black text-primary tracking-tighter">{data.detections.chatOps}</p>
                                 <p class="text-primary text-sm font-black tracking-tighter">{data.detections.chatOpsPercent}</p>
@@ -140,7 +140,7 @@
                         </div>
                         <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-1 h-full bg-primary/20"></div>
-                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Containment</p>
+                            <p class="text-[10px] uppercase font-black text-foreground/40 mb-2 tracking-widest">Containment Required</p>
                             <div class="flex items-baseline gap-4">
                                 <p class="text-2xl font-black text-primary tracking-tighter">{data.detections.containment}</p>
                                 <p class="text-primary text-sm font-black tracking-tighter">{data.detections.containmentPercent}</p>

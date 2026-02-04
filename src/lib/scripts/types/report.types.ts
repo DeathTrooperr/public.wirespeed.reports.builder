@@ -125,5 +125,15 @@ export interface ReportData {
 
     casesBySeverity: CaseSeverity;
     suspiciousLoginLocations: CountryDetection[];
-    escalatedCases: EscalatedCase[];
+    darkWebReport: {
+        totalExposures: number;
+        highRiskExposures: number;
+        compromisedAccounts: number;
+        recentLeaks: Array<{
+            date: string;
+            source: string;
+            type: string;
+            severity: 'HIGH' | 'MEDIUM' | 'LOW';
+        }>;
+    };
 }

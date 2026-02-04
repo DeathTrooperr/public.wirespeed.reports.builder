@@ -5,6 +5,7 @@
     import DetectionAnalysisPage from './reportPages/03-DetectionAnalysisPage.svelte';
     import ResponseActivityPage from './reportPages/04-ResponseActivityPage.svelte';
     import AssetIntelligencePage from './reportPages/05-AssetIntelligencePage.svelte';
+    import DarkWebReportPage from './reportPages/DarkWebReportPage.svelte';
     import DataIngestionPage from './reportPages/06-DataIngestionPage.svelte';
 
     let { data }: { data: ReportData } = $props();
@@ -75,7 +76,7 @@
     })());
 
     let totalCasePages = $derived(caseChunks.length);
-    let totalPages = $derived(5 + totalCasePages);
+    let totalPages = $derived(6 + totalCasePages);
 
     function hexToHsl(hex: string): string {
         hex = hex.replace(/^#/, '');
@@ -168,5 +169,7 @@
 
     <AssetIntelligencePage {data} pageNumber={4 + totalCasePages} {totalPages} />
 
-    <DataIngestionPage {data} pageNumber={5 + totalCasePages} {totalPages} />
+    <DarkWebReportPage {data} pageNumber={5 + totalCasePages} {totalPages} />
+
+    <DataIngestionPage {data} pageNumber={6 + totalCasePages} {totalPages} />
 </div>
