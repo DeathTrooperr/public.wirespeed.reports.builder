@@ -25,9 +25,6 @@
         <div class="grid grid-cols-3 gap-8 mb-6">
             <!-- Confirmation Rate Chart -->
             <div class="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-3">
-                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                </div>
                 <div class="relative w-24 h-24">
                     <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
                         <path
