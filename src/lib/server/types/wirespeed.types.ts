@@ -168,7 +168,9 @@ export interface IntegrationActionV2 {
 export interface IntegrationMetadataConfigV2 {
 	authType: 'oauth2' | 'api_token' | 'basic' | 'other';
 	name: string;
+	oauthRequiresRedirect?: boolean;
 	customFields: IntegrationMetadataConfigCustomFieldV2[];
+	requiresConfiguration?: boolean;
 	logo: string;
 	logoLight: string;
 	logoDark: string;
@@ -181,6 +183,7 @@ export interface IntegrationMetadataConfigV2 {
 	rtfm: boolean;
 	useCases: UseCase[];
 	webhookActions: IntegrationActionV2[];
+	singleInstallOnly?: boolean;
 }
 
 export interface IntegrationV2 {
@@ -188,10 +191,28 @@ export interface IntegrationV2 {
 	platform: IntegrationPlatform;
 	enabled: boolean;
 	teamId: string;
+	teamName?: string;
 	config: IntegrationMetadataConfigV2;
 	permissionsUpdateAvailable: boolean;
 	permissionUpdateExplanation: string;
+	requiresConfiguration?: string;
 	identityFields: Record<string, unknown>;
+	muteHourlyQuality?: Record<string, unknown>;
+}
+
+export interface IntegrationSearch {
+	data: IntegrationV2[];
+	totalCount: number;
+}
+
+export interface IntegrationSearchDto {
+	size?: number;
+	page?: number;
+	filter?: string;
+	search?: string;
+	orderBy?: string;
+	orderDir?: 'asc' | 'desc';
+	includeDisabled?: boolean;
 }
 
 export interface TeamOCSFStatistic {
@@ -740,4 +761,11 @@ export interface Detection {
 export interface Detections {
 	data: Detection[];
 	totalCount: number;
+}
+
+export interface DetectionCategoryClassStat {
+    categoryClass: string;
+    displayName: string;
+    count: number;
+    percentage: number;
 }

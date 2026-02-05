@@ -40,7 +40,23 @@ function formatTimeMetric(metric: { average: number | string; unit: string }) {
     }
 }
 
-export async function getReportData(apiKey: string, timeframe: { startDate: string, endDate: string, periodLabel: string }, teamId?: string, customColors?: { primary?: string, secondary?: string }): Promise<ReportData> {
+function getIntegrationTypes(description: string | undefined): string[] {
+    const desc = (description || '').toLowerCase();
+    const types: string[] = [];
+    if (desc.includes('password')) types.push('Identity');
+    if (desc.includes('mfa') || desc.includes('2fa') || desc.includes('otp')) types.push('Identity');
+    if (desc.includes('email') || desc.includes('mail') || desc.includes('office 365') || desc.includes('google workspace')) types.push('Email');
+    if (desc.includes('endpoint') || desc.includes('edr') || desc.includes('antivirus') || desc.includes('xdr')) types.push('Endpoint');
+    if (desc.includes('user') || desc.includes('identity') || desc.includes('active directory') || desc.includes('entra') || desc.includes('okta') || desc.includes('duo')) types.push('Identity');
+    if (desc.includes('cloud') || desc.includes('aws') || desc.includes('azure') || desc.includes('gcp')) types.push('Cloud');
+    if (desc.includes('network') || desc.includes('firewall') || desc.includes('vpn') || desc.includes('dns')) types.push('Network');
+    if (desc.includes('saas') || desc.includes('application')) types.push('SaaS');
+    
+    if (types.length === 0) types.push('Other');
+    return types;
+}
+
+export async function getReportData(apiKey: string, timeframe: { startDate: string, endDate: string, periodLabel: string }, teamId?: string, customColors?: { primary?: string, secondary?: string }, hidePoweredBy?: boolean): Promise<ReportData> {
     const { startDate, endDate, periodLabel } = timeframe;
     let api = new WirespeedApi(apiKey);
     let branding: ReportData['branding'] = undefined;
@@ -58,6 +74,7 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
             logoDark: logos.platformLogoDark,
             spName: spTeam.name,
             supportEmail: spTeam.supportEmail,
+            hidePoweredBy,
             colors: customColors,
             theme: 'light' // Default theme for branding object if not specified
         };
@@ -69,7 +86,7 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
-    const [team, stats, severityStats, mttr, mttd, mttv, mttc, cases, detections, privateCredentialCases, publicCredentialCases] = await Promise.all([
+    const [team, stats, severityStats, mttr, mttd, mttv, mttc, cases, detections, privateCredentialCases, publicCredentialCases, detectionStatsByCategoryClass, integrationsRes] = await Promise.all([
         api.getCurrentTeam(),
         api.getTeamStatistics(days),
         api.getCasesStatsBySeverity(days),
@@ -98,7 +115,9 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
             orderDir: 'desc',
             createdAt: { gte: startDateString },
             category: 'IDENTITY__PUBLIC_CREDENTIAL_EXPOSURE'
-        })
+        }),
+        api.getDetectionStatsByCategoryClass(days),
+        api.getIntegrations({ includeDisabled: true })
     ]);
 
     const credentialCases = {
@@ -248,6 +267,48 @@ export async function getReportData(apiKey: string, timeframe: { startDate: stri
                 country: l.country,
                 count: l.count
             })),
+
+        integrations: integrationsRes.data.map((i) => ({
+            name: (i.platform == "generic-json" || i.platform == "generic-syslog") ? i.identityFields?.label as string : i.config?.name || i.platform,
+            types: getIntegrationTypes(i.config?.description),
+            platform: String(i.platform),
+            enabled: Boolean(i.enabled),
+            logo: i.config?.logoLight || i.config?.logo
+        })).filter(i => !["have-i-been-pwned", "ipinfo", "reversing-labs", "wirespeed" ,"sms", "slack", "email", "microsoft-teams"].includes(i.platform)),
+
+        detectionStatsByCategoryClass: detectionStatsByCategoryClass.map(c => ({
+            categoryClass: c.categoryClass,
+            displayName: c.displayName,
+            count: c.count,
+            percentage: c.percentage
+        })),
+
+        mappedDetectionStats: ((): Array<{ category: string, percentage: number, count: number }> => {
+            const fixedCategories = [
+                { key: 'endpoint', label: 'Endpoint' },
+                { key: 'identity', label: 'Identity' },
+                { key: 'cloud', label: 'Cloud' },
+                { key: 'email', label: 'Email' },
+                { key: 'network', label: 'Network' },
+                { key: 'data', label: 'Data Loss' },
+                { key: 'other', label: 'Other' }
+            ];
+            
+            const totalDetections = stats.totalDetections || 1;
+            
+            return fixedCategories.map(cat => {
+                const found = detectionStatsByCategoryClass.find(
+                    s => s.categoryClass?.toLowerCase() === cat.key.toLowerCase() || 
+                         s.displayName?.toLowerCase() === cat.label.toLowerCase()
+                );
+                const count = found ? found.count : 0;
+                return {
+                    category: cat.label,
+                    percentage: (count / totalDetections) * 100,
+                    count: count
+                };
+            });
+        })(),
 
         escalatedCases: ((): EscalatedCase[] => {
             const severityOrder: Record<string, number> = {

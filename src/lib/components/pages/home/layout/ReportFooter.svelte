@@ -19,7 +19,11 @@
     <div>
         <div class="flex items-center gap-3 mb-2">
             <p class="text-primary font-black text-xs tracking-tighter">
-                {branding?.spName ? 'Powered by Wirespeed' : 'Wirespeed by Coalition'}
+                {#if branding?.hidePoweredBy && branding?.spName}
+                    {branding.spName}
+                {:else}
+                    {branding?.spName ? 'Powered by Wirespeed' : 'Wirespeed by Coalition'}
+                {/if}
             </p>
         </div>
         {#if showDetails}

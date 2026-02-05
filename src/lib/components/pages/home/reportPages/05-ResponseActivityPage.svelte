@@ -15,7 +15,7 @@
 </script>
 
 <ReportPage 
-    pageNumber={4 + index} 
+    pageNumber={5 + index} 
     {totalPages}
     reportPeriodLabel={data.reportPeriodLabel}
     branding={data.branding}

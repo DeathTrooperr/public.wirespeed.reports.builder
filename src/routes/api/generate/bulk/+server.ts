@@ -13,6 +13,7 @@ export const POST: RequestHandler = async ({ request, platform, url }) => {
 			primary?: string;
 			secondary?: string;
 		};
+		hidePoweredBy?: boolean;
 		timeframe: {
 			startDate: string;
 			endDate: string;
@@ -20,7 +21,7 @@ export const POST: RequestHandler = async ({ request, platform, url }) => {
 		};
 	};
 
-	const { apiKey, teamIds, timeframe, customColors } = body;
+	const { apiKey, teamIds, timeframe, customColors, hidePoweredBy } = body;
 
 	if (!apiKey || !teamIds || teamIds.length === 0) {
 		throw error(400, 'API key and team IDs are required');
@@ -38,7 +39,7 @@ export const POST: RequestHandler = async ({ request, platform, url }) => {
 	try {
 		for (const teamId of teamIds) {
 			try {
-				const reportData = await getReportData(apiKey, timeframe, teamId, customColors);
+				const reportData = await getReportData(apiKey, timeframe, teamId, customColors, hidePoweredBy);
 				const page = await browser.newPage();
 				
 				// Use the current origin for the render page

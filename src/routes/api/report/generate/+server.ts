@@ -11,20 +11,21 @@ export const POST: RequestHandler = async ({ request }) => {
 				primary?: string;
 				secondary?: string;
 			};
+			hidePoweredBy?: boolean;
 			timeframe: {
 				startDate: string;
 				endDate: string;
 				periodLabel: string;
 			};
 		};
-		const { apiKey, timeframe, teamId, customColors } = body;
+		const { apiKey, timeframe, teamId, customColors, hidePoweredBy } = body;
 
 		if (!apiKey) {
 			return json({ error: 'API key is required' }, { status: 400 });
 		}
 
 		try {
-			const report = await getReportData(apiKey, timeframe, teamId, customColors);
+			const report = await getReportData(apiKey, timeframe, teamId, customColors, hidePoweredBy);
 			return json(report);
 		} catch (apiError: any) {
 			console.error('Wirespeed API error during report generation:', apiError);

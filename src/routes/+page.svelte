@@ -3,6 +3,7 @@
     import { fade, slide } from 'svelte/transition';
     import Report from '$lib/components/pages/home/Report.svelte';
     import ErrorReport from '$lib/components/ui/ErrorReport.svelte';
+    import IncompatibleDevice from '$lib/components/ui/IncompatibleDevice.svelte';
     import type { ReportData, AppError } from '$lib/scripts/types/report.types.js';
     import type { Team } from '$lib/server/types/wirespeed.types.js';
 
@@ -75,13 +76,15 @@
             });
         }
 
-        // 3. Handle Automatic Team Fetching
-        const currentKey = apiKey;
-        if (currentKey && currentKey.length >= 32 && currentKey !== lastFetchedKey) {
-            const timer = setTimeout(() => {
-                untrack(() => fetchTeams());
-            }, 500);
-            return () => clearTimeout(timer);
+        // 3. Handle Automatic Team Fetching (client-only to avoid SSR fetch)
+        if (typeof window !== 'undefined') {
+            const currentKey = apiKey;
+            if (currentKey && currentKey.length >= 32 && currentKey !== lastFetchedKey) {
+                const timer = setTimeout(() => {
+                    untrack(() => fetchTeams());
+                }, 500);
+                return () => clearTimeout(timer);
+            }
         }
     });
 
@@ -101,6 +104,23 @@
     let customStart = $state('');
     let customEnd = $state('');
     let appError = $state<AppError | null>(null);
+    let isIncompatible = $state(false);
+    let hidePoweredBy = $state(false);
+
+    $effect(() => {
+        if (typeof window !== 'undefined') {
+            const checkCompatibility = () => {
+                const ua = navigator.userAgent;
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+                const isSmallScreen = window.innerWidth < 1024;
+                isIncompatible = isMobile || isSmallScreen;
+            };
+
+            checkCompatibility();
+            window.addEventListener('resize', checkCompatibility);
+            return () => window.removeEventListener('resize', checkCompatibility);
+        }
+    });
 
     const today = new Date().toISOString().slice(0, 10);
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -260,6 +280,7 @@
                     customColors: mode === 'service-provider' ? {
                         primary: primaryColor
                     } : undefined,
+                    hidePoweredBy: mode === 'service-provider' ? hidePoweredBy : false,
                     timeframe: {
                         startDate: dateRange.start,
                         endDate: dateRange.end,
@@ -320,6 +341,7 @@
                     apiKey,
                     teamIds: selectedTeamIds,
                     customColors: { primary: primaryColor },
+                    hidePoweredBy,
                     timeframe: {
                         startDate: dateRange.start,
                         endDate: dateRange.end,
@@ -580,6 +602,19 @@
                                     {/each}
                                 </select>
                             </div>
+
+                            <label class="flex items-center gap-3 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors group">
+                                <div class="relative flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        bind:checked={hidePoweredBy}
+                                        class="peer sr-only"
+                                    />
+                                    <div class="w-8 h-4 bg-white/10 rounded-full transition-colors peer-checked:bg-white/30"></div>
+                                    <div class="absolute left-0.5 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-white"></div>
+                                </div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-white/50 group-hover:text-white/70 transition-colors">Hide "Powered by Wirespeed"</span>
+                            </label>
                         {/if}
 
                         <button 
@@ -628,6 +663,19 @@
                                 {/if}
                             </div>
                         </div>
+
+                        <label class="flex items-center gap-3 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors group">
+                            <div class="relative flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    bind:checked={hidePoweredBy}
+                                    class="peer sr-only"
+                                />
+                                <div class="w-8 h-4 bg-white/10 rounded-full transition-colors peer-checked:bg-white/30"></div>
+                                <div class="absolute left-0.5 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-white"></div>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-white/50 group-hover:text-white/70 transition-colors">Hide "Powered by Wirespeed"</span>
+                        </label>
 
                         <button 
                             onclick={bulkExport}
@@ -716,6 +764,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 opacity-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 <p class="font-medium text-gray-400">Configure settings and generate a report to see the preview</p>
             </div>
+        {/if}
+
+        {#if isIncompatible}
+            <IncompatibleDevice />
         {/if}
     </main>
 

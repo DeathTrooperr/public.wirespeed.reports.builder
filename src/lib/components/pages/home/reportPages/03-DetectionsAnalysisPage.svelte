@@ -12,7 +12,7 @@
     reportPeriodLabel={data.reportPeriodLabel}
     branding={data.branding}
 >
-    <ReportSection title="Detection Analysis" isMain={true}>
+    <ReportSection title="Detections Analysis" isMain={true}>
         <div class="grid grid-cols-3 gap-6 mb-6">
                 <div class="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-3xl"></div>

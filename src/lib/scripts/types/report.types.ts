@@ -16,6 +16,7 @@ export interface Branding {
     theme?: Theme;
     spName?: string;
     supportEmail?: string;
+    hidePoweredBy?: boolean;
     colors?: {
         primary?: string;
         secondary?: string;
@@ -125,6 +126,24 @@ export interface ReportData {
 
     casesBySeverity: CaseSeverity;
     suspiciousLoginLocations: CountryDetection[];
+    integrations: Array<{
+        name: string;
+        types: string[];
+        platform: string;
+        enabled: boolean;
+        logo?: string | undefined;
+    }>;
+    detectionStatsByCategoryClass: Array<{
+        categoryClass: string;
+        displayName: string;
+        count: number;
+        percentage: number;
+    }>;
+    mappedDetectionStats: Array<{
+        category: string;
+        percentage: number;
+        count: number;
+    }>;
     darkWebReport: {
         totalExposures: number;
         highRiskExposures: number;

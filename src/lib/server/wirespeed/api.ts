@@ -3,7 +3,10 @@ import type {
 	CaseSeverityStat,
 	Cases,
 	Detection,
+	DetectionCategoryClassStat,
 	Detections,
+	IntegrationSearch,
+	IntegrationSearchDto,
 	SearchCasesDto,
 	SearchDetectionsDto,
 	SearchTeam,
@@ -164,6 +167,26 @@ export class WirespeedApi {
 	async getAssetsByDetectionId(id: string): Promise<Assets> {
 		return this.request<Assets>(`/asset/detection/${id}`, {
 			method: 'GET'
+		});
+	}
+
+	/**
+	 * Get detection statistics by category class
+	 */
+	async getDetectionStatsByCategoryClass(days: number): Promise<DetectionCategoryClassStat[]> {
+		return this.request<DetectionCategoryClassStat[]>('/detection/stats/category-class', {
+			method: 'POST',
+			body: JSON.stringify({ days })
+		});
+	}
+
+	/**
+	 * Search integrations
+	 */
+	async getIntegrations(query: IntegrationSearchDto): Promise<IntegrationSearch> {
+		return this.request<IntegrationSearch>('/integration', {
+			method: 'POST',
+			body: JSON.stringify(query)
 		});
 	}
 }

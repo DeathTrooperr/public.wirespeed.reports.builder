@@ -2,11 +2,11 @@
     import type { ReportData, EscalatedCase } from '$lib/scripts/types/report.types.js';
     import TitlePage from './reportPages/01-TitlePage.svelte';
     import ExecutiveSummaryPage from './reportPages/02-ExecutiveSummaryPage.svelte';
-    import DetectionAnalysisPage from './reportPages/03-DetectionAnalysisPage.svelte';
-    import ResponseActivityPage from './reportPages/04-ResponseActivityPage.svelte';
-    import AssetIntelligencePage from './reportPages/05-AssetIntelligencePage.svelte';
-    import DarkWebReportPage from './reportPages/06-DarkWebReportPage.svelte';
-    import DataIngestionPage from './reportPages/07-DataIngestionPage.svelte';
+    import DetectionAnalysisPage from './reportPages/03-DetectionsAnalysisPage.svelte';
+    import DetectionOverviewPage from './reportPages/04-DetectionsBreakdownPage.svelte';
+    import ResponseActivityPage from './reportPages/05-ResponseActivityPage.svelte';
+    import AssetIntelligencePage from './reportPages/06-AssetIntelligencePage.svelte';
+    import DarkWebReportPage from './reportPages/07-DarkWebReportPage.svelte';
 
     let { data }: { data: ReportData } = $props();
 
@@ -75,8 +75,51 @@
         return chunks;
     })());
 
+    let integrationChunks = $derived((() => {
+        const integrations = data.integrations || [];
+        if (integrations.length === 0) return [[]];
+        
+        const chunks: any[][] = [];
+        const INTEGRATION_ROW_HEIGHT = 50; // Approximated
+        const PAGE_HEIGHT = 800;
+        const BREAKDOWN_SECTION_HEIGHT = 450;
+        const SECTION_HEADER_HEIGHT = 40;
+
+        let currentChunk: any[] = [];
+        let currentHeight = 0;
+        let isFirstPage = true;
+
+        for (const integ of integrations) {
+            let availableHeight = PAGE_HEIGHT - SECTION_HEADER_HEIGHT;
+            if (isFirstPage) {
+                availableHeight -= BREAKDOWN_SECTION_HEIGHT;
+            }
+
+            // Since it's a 2-column grid, we effectively add height every 2 items
+            const effectivelyAddingHeight = currentChunk.length % 2 === 0;
+            const addedHeight = effectivelyAddingHeight ? INTEGRATION_ROW_HEIGHT : 0;
+
+            if (currentChunk.length > 0 && (currentHeight + addedHeight > availableHeight)) {
+                chunks.push(currentChunk);
+                currentChunk = [integ];
+                currentHeight = INTEGRATION_ROW_HEIGHT;
+                isFirstPage = false;
+            } else {
+                currentChunk.push(integ);
+                currentHeight += addedHeight;
+            }
+        }
+
+        if (currentChunk.length > 0) {
+            chunks.push(currentChunk);
+        }
+        
+        return chunks;
+    })());
+
     let totalCasePages = $derived(caseChunks.length);
-    let totalPages = $derived(6 + totalCasePages);
+    let totalIntegrationPages = $derived(integrationChunks.length);
+    let totalPages = $derived(5 + totalIntegrationPages + totalCasePages);
 
     function hexToHsl(hex: string): string {
         hex = hex.replace(/^#/, '');
@@ -157,6 +200,16 @@
     
     <DetectionAnalysisPage {data} {totalPages} />
     
+    {#each integrationChunks as chunk, i}
+        <DetectionOverviewPage 
+            {data} 
+            {chunk}
+            index={i}
+            {totalIntegrationPages}
+            {totalPages} 
+        />
+    {/each}
+    
     {#each caseChunks as chunk, i}
         <ResponseActivityPage 
             {data} 
@@ -167,9 +220,7 @@
         />
     {/each}
 
-    <AssetIntelligencePage {data} pageNumber={4 + totalCasePages} {totalPages} />
+    <AssetIntelligencePage {data} pageNumber={4 + totalIntegrationPages + totalCasePages} {totalPages} />
 
-    <DarkWebReportPage {data} pageNumber={5 + totalCasePages} {totalPages} />
-
-    <DataIngestionPage {data} pageNumber={6 + totalCasePages} {totalPages} />
+    <DarkWebReportPage {data} pageNumber={5 + totalIntegrationPages + totalCasePages} {totalPages} />
 </div>
