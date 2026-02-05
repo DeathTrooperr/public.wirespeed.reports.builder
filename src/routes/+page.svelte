@@ -470,6 +470,21 @@
                     </div>
                 {/if}
 
+                {#if mode === 'service-provider'}
+                    <label class="flex items-center gap-3 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors group">
+                        <div class="relative flex items-center">
+                            <input 
+                                type="checkbox" 
+                                bind:checked={hidePoweredBy}
+                                class="peer sr-only"
+                            />
+                            <div class="w-8 h-4 bg-white/10 rounded-full transition-colors peer-checked:bg-white/30"></div>
+                            <div class="absolute left-0.5 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-white"></div>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/50 group-hover:text-white/70 transition-colors">Hide "Powered by Wirespeed"</span>
+                    </label>
+                {/if}
+
                 <div class="space-y-4 pt-2">
                     <p class="text-[10px] font-black uppercase tracking-widest text-white/50">Reporting Period</p>
                     
@@ -602,19 +617,6 @@
                                     {/each}
                                 </select>
                             </div>
-
-                            <label class="flex items-center gap-3 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors group">
-                                <div class="relative flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        bind:checked={hidePoweredBy}
-                                        class="peer sr-only"
-                                    />
-                                    <div class="w-8 h-4 bg-white/10 rounded-full transition-colors peer-checked:bg-white/30"></div>
-                                    <div class="absolute left-0.5 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-white"></div>
-                                </div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-white/50 group-hover:text-white/70 transition-colors">Hide "Powered by Wirespeed"</span>
-                            </label>
                         {/if}
 
                         <button 
@@ -663,19 +665,6 @@
                                 {/if}
                             </div>
                         </div>
-
-                        <label class="flex items-center gap-3 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors group">
-                            <div class="relative flex items-center">
-                                <input 
-                                    type="checkbox" 
-                                    bind:checked={hidePoweredBy}
-                                    class="peer sr-only"
-                                />
-                                <div class="w-8 h-4 bg-white/10 rounded-full transition-colors peer-checked:bg-white/30"></div>
-                                <div class="absolute left-0.5 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-white"></div>
-                            </div>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-white/50 group-hover:text-white/70 transition-colors">Hide "Powered by Wirespeed"</span>
-                        </label>
 
                         <button 
                             onclick={bulkExport}
