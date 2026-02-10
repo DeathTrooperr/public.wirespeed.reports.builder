@@ -77,9 +77,9 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .a4-page {
-    width: 210mm;
-    height: 297mm;
+  .report-page {
+    width: 215.9mm;
+    height: 279.4mm;
     padding: 20mm;
     margin: 10mm auto;
     box-shadow: 0 0 20px rgba(0,0,0,0.05);
@@ -142,7 +142,7 @@
 
   @media print {
     @page {
-      size: A4;
+      size: letter;
       margin: 0;
     }
     body {
@@ -158,11 +158,11 @@
         filter: none !important;
         -webkit-filter: none !important;
     }
-    .a4-page {
+    .report-page {
         margin: 0;
         box-shadow: none;
-        width: 210mm;
-        height: 297mm;
+        width: 215.9mm;
+        height: 279.4mm;
     }
   }
 }

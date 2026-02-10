@@ -52,12 +52,12 @@ export const POST: RequestHandler = async ({ request, platform, url }) => {
 
 				// Wait for some element that indicates report is rendered
 				// Since Report.svelte has several pages, we wait for the last page or just a bit
-				await page.waitForSelector('.a4-page', { timeout: 10000 });
+				await page.waitForSelector('.report-page', { timeout: 10000 });
                 // Small buffer for charts to animate/render
                 await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
 
 				const pdf = await page.pdf({
-					format: 'A4',
+					format: 'Letter',
 					printBackground: true,
 					margin: { top: 0, right: 0, bottom: 0, left: 0 }
 				});

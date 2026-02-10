@@ -10,7 +10,7 @@ Seamlessly integrates with the Wirespeed API to aggregate real-time data across 
 ### 🎨 Professional Design & Branding
 - **Executive Aesthetics**: Clean, minimalist design optimized for readability and professional presentation.
 - **Service Provider Support**: Fully customizable branding for MSPs, including white-label logos and primary color synchronization.
-- **Precision Layout**: Pixel-perfect A4 document structure with automatic page breaking and consistent typography.
+- **Precision Layout**: Pixel-perfect Letter document structure with automatic page breaking and consistent typography.
 
 ### 📊 Comprehensive Insights
 - **Executive Summary**: High-level overview of security posture and service coverage.

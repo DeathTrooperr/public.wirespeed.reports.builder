@@ -34,6 +34,6 @@
         background: white;
     }
     .print-container {
-        width: 210mm;
+        width: 215.9mm;
     }
 </style>
