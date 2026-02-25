@@ -25,7 +25,7 @@ Seamlessly integrates with the Wirespeed API to aggregate real-time data across 
 
 ## 🔗 Live Demo
 
-[![Live Demo](https://img.shields.io/badge/DEMO-VIEW_LIVE_REPORT_BUILDER-0052FF?style=for-the-badge&logo=rocket&logoColor=white)](https://demo-link-placeholder.com)
+[![Live Demo](https://img.shields.io/badge/DEMO-VIEW_LIVE_REPORT_BUILDER-0052FF?style=for-the-badge&logo=rocket&logoColor=white)](https://wirespeed-reports-builder.northernlight.workers.dev/)
 
 > **Experience the generator**: A valid Wirespeed API Key is required to fetch real-time data. You can explore the professional design and modular layout directly in the live environment.
 
