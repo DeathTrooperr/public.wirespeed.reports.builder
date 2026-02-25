@@ -4,12 +4,14 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "wirespeed-reports",
+	"name": "wirespeed-reports-builder",
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2026-01-24",
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"workers_dev": true,
+	"preview_urls": true,
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
@@ -17,10 +19,6 @@
 	"observability": {
 		"enabled": false
 	},
-	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
 	"placement": {  "mode": "smart" },
 	"browser": {
 		"binding": "BROWSER"

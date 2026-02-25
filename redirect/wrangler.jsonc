@@ -1,0 +1,9 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "wirespeed-reports",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-01-24",
+	"observability": {
+		"enabled": true
+	}
+}

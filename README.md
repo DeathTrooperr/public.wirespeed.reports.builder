@@ -1,6 +1,6 @@
 # Wirespeed Security Operations Reports
 
-A professional, high-performance report generation engine for Wirespeed Managed Detection & Response (MDR). This platform transforms complex security telemetry into executive-grade, print-ready A4 reports, providing clear insights into security posture and operational efficiency.
+A professional, high-performance report generation engine for Wirespeed Managed Detection & Response (MDR). This platform transforms complex security telemetry into executive-grade, print-ready reports, providing clear insights into security posture and operational efficiency.
 
 ## 🌟 Key Features
 
@@ -20,14 +20,21 @@ Seamlessly integrates with the Wirespeed API to aggregate real-time data across 
 - **Infrastructure Overview**: Detailed event ingestion metrics by source and volume.
 
 ### 📥 Versatile Export Options
-- **Bulk Export**: Generate multiple client reports simultaneously, delivered as a secure ZIP archive.
+- **Bulk Export**: Generate multiple client reports simultaneously, delivered as a secure ZIP archive using Cloudflare Browser Rendering.
 - **High-Fidelity PDF**: CSS-optimized rendering specifically designed for headless browser environments and physical printing.
+
+## 🔗 Live Demo
+
+[![Live Demo](https://img.shields.io/badge/DEMO-VIEW_LIVE_REPORT_BUILDER-0052FF?style=for-the-badge&logo=rocket&logoColor=white)](https://demo-link-placeholder.com)
+
+> **Experience the generator**: A valid Wirespeed API Key is required to fetch real-time data. You can explore the professional design and modular layout directly in the live environment.
 
 ## 🛠 Tech Stack
 
 - **Frontend**: [Svelte 5](https://svelte.dev) (utilizing modern Runes-native state management)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com) (utility-first, high-performance styling)
-- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/) & [Browser Rendering](https://developers.cloudflare.com/browser-rendering/)
+- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **PDF Generation**: [Cloudflare Browser Rendering](https://developers.cloudflare.com/browser-rendering/) (Puppeteer)
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (ensuring robust type safety across the stack)
 
 ## 🚀 Getting Started
@@ -35,12 +42,13 @@ Seamlessly integrates with the Wirespeed API to aggregate real-time data across 
 ### Prerequisites
 - Node.js (v20 or later)
 - A valid Wirespeed API Key
+- Cloudflare Account with Browser Rendering enabled (for PDF generation)
 
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-org/WirespeedReports.git
-   cd WirespeedReports
+   git clone https://github.com/DeathTrooperr/public.wirespeed.reports.builder.git
+   cd public.wirespeed.reports.builder
    ```
 2. Install dependencies:
    ```bash
@@ -83,6 +91,7 @@ The project is optimized for deployment on Cloudflare's edge network.
 - `src/lib/server/wirespeed`: Wirespeed API client and specialized telemetry types.
 - `src/lib/components/pages/home`: Svelte components for the report engine and modular page layouts.
 - `src/routes/api`: Serverless endpoints for data fetching and headless PDF generation.
+- `src/routes/render`: Specialized route for headless browser PDF rendering.
 
 ---
 
