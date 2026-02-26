@@ -14,14 +14,11 @@ export const POST: RequestHandler = async ({ request }) => {
         let searchResult;
         
         try {
-            [currentTeam, searchResult] = await Promise.all([
-                api.getCurrentTeam(),
-                api.searchTeams({
-                    size: 1000,
-                    orderBy: 'name',
-                    orderDir: 'asc'
-                })
-            ]);
+					  currentTeam = await api.getCurrentTeam();
+						searchResult = !currentTeam.serviceProvider ? [] : await api.searchTeams({
+							orderBy: 'name',
+							orderDir: 'asc'
+						});
         } catch (apiError: any) {
             console.error('Wirespeed API error in teams fetch:', apiError);
             const isAuthError = apiError.message?.includes('401');
