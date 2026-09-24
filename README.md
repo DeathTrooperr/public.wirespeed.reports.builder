@@ -40,7 +40,7 @@ Seamlessly integrates with the Wirespeed API to aggregate real-time data across 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v20 or later)
+- Node.js 22.18+ (Node.js 24 recommended)
 - A valid Wirespeed API Key
 - Cloudflare Account with Browser Rendering enabled (for PDF generation)
 
