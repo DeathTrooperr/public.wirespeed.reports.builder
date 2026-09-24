@@ -450,7 +450,7 @@
         }
 
         try {
-            const response = await fetch('/api/generate/bulk', {
+            const response = await fetch('/api/report/generate/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -1,51 +1,62 @@
 export interface Team {
 	id: string;
 	name: string;
+	enabled: boolean;
 	demo: boolean;
+	refreshable: boolean;
 	testMode: boolean;
 	chatOpsWelcomeMessage?: string;
 	platformName?: string;
 	maxChatOpsPerDay?: number;
 	maxAutoContainmentsPerDay?: number;
 	chatOpsEscalationDelayMinutes: number;
+	monitorHours: number;
 	identityAutoContainment: boolean;
 	endpointAutoContainment: boolean;
+	fileAutoContainment: boolean;
+	/** @deprecated escalation emails are now stored in notification_subscription. Use GET /notification/subscription/team-channel?type=NEW_CASE_ESCALATION instead. Removal scheduled for 2026-09-20. */
 	escalationEmails: string[];
-	autoContainIdentityNHI: boolean;
-	autoContainIdentityVIP: boolean;
-	autoContainLSTEndpoint: boolean;
-	autoContainLOTLEndpoint: boolean;
-	autoContainEndpointHVA: boolean;
-	autoContainUnmitigatedMalware: boolean;
-	autoContainEndpointServers: boolean;
+	escalationSubscriptionEmails: string[];
 	logoUrl: string;
 	chatOpsSecondFactor: boolean;
+	chatOpsAutoExclusion: boolean;
 	chatOpsAccountLockedMessage: string;
 	createdAt: string;
-	richCaseNotifications?: boolean;
+	/** @deprecated escalation rich-formatting is now stored per recipient in notification_subscription. Removal scheduled for 2026-09-20. */
+	richCaseNotifications: boolean;
+	/** @deprecated the escalation subject is now stored per recipient in notification_subscription (null → scope-aware per-type default). Removal scheduled for 2026-09-20. */
 	escalationSubjectLine?: string;
-	vipChatOps: boolean;
-	managerChatOps: boolean;
 	emailSignature: string;
 	chatOpsSubjectLine: string;
-	notificationEscalationSeverity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 	chatOpsWelcomeMessageInherited?: boolean;
 	emailSignatureInherited?: boolean;
 	chatOpsSubjectLineInherited?: boolean;
 	chatOpsAccountLockedMessageInherited?: boolean;
+	domain?: string | null;
 	serviceProvider?: boolean;
 	parentTeamName?: string;
 	parentTeamId?: string;
+	parentServiceProvider?: boolean;
 	operatingTeam?: boolean;
 	useChatOpsOnboardingGroup?: boolean;
 	chatOpsAllowBulkSmsInvite?: boolean;
-	billableUsers: number;
-	billableEndpoints: number;
+	billableUsers?: number;
+	billableEndpoints?: number;
+	dataStorageGb?: number | null;
+	teamMembers?: number;
 	supportEmail?: string;
 	address?: string;
 	autoSubscribeServiceProviderUsers: boolean;
-	orgId?: string;
-	logo?: string; // Legacy field retained if still used elsewhere
+	sku: 'identity' | 'adr';
+	addOns: 'data'[];
+	skuStartDate?: string;
+	skuEndDate?: string;
+	isTrial: boolean;
+	skipThirdPartyManagedSourceUpdates: boolean;
+	onboardingChecklistCompleted: boolean;
+	onboardingChecklistDismissed: boolean;
+	askForG2Review: boolean;
+	remediationManualUiEnabled: boolean;
 }
 
 export interface PaginationDto {
@@ -59,10 +70,10 @@ export interface PaginationDto {
 
 export interface SearchTeam {
 	data: Team[];
-	totalCount: number;
 }
 
 export interface ReportPeriodDto {
+	days?: number;
 	startDate?: string;
 	endDate?: string;
 }
@@ -82,113 +93,268 @@ export interface IntegrationMetadataConfigCustomFieldV2 {
 	display: string;
 	type: string;
 	required: boolean;
-	description: string;
-	validationPattern: string;
-	validationMinLength: number;
-	validationMaxLength: number;
-	source: string;
-	advancedOption: boolean;
+	description?: string;
+	defaultValue?: string | number | boolean;
+	validationPattern?: string;
+	validationMinLength?: number;
+	validationMaxLength?: number;
+	source?: string;
+	advancedOption?: boolean;
+	hidden?: boolean;
+	nonEditable?: boolean;
+	entitlementSlug?: string;
+	authMethod?: string;
+	multiline?: boolean;
+	renderAs?: 'switch-card';
 }
 
 export type UseCase =
 	| 'chat_ops'
 	| 'CHECK_ATTACK_SIMULATION'
 	| 'CHECK_BREACH'
-	| 'contain_endpoint'
-	| 'contain_user'
+	| 'CHECK_PLANNED_CHANGE'
+	| 'contain_endpoint_isolate'
+	| 'contain_endpoint_lock'
+	| 'contain_user_disable'
+	| 'contain_user_reset_password'
+	| 'contain_user_revoke_sessions'
+	| 'contain_file_delete'
+	| 'contain_file_quarantine'
 	| 'CREATE_TICKET'
 	| 'ENRICH_FILE'
 	| 'ENRICH_IP'
+	| 'enrich_detection'
+	| 'ON_CONNECT'
 	| 'ON_ENABLE'
 	| 'ON_DISABLE'
 	| 'get_detections'
 	| 'get_endpoint'
 	| 'get_endpoints'
+	| 'get_advanced_hunt'
 	| 'get_logs'
 	| 'get_user'
 	| 'get_users'
+	| 'get_user_licenses'
 	| 'INTERNAL'
 	| 'INTERNAL_AUTH_CHECK'
 	| 'OTHER'
+	| 'LOG_PARSER'
+	| 'DETECTION_PARSER'
 	| 'SEND_MESSAGE'
-	| 'uncontain_endpoint'
-	| 'uncontain_user'
+	| 'uncontain_endpoint_unisolate'
+	| 'uncontain_endpoint_unlock'
+	| 'uncontain_file_add_exclusion'
+	| 'uncontain_file_unquarantine'
+	| 'uncontain_user_enable'
 	| 'update_detection_source'
 	| 'UPDATE_TICKET'
-	| 'webhook';
+	| 'webhook'
+	| 'refresh_detection'
+	| 'get_rules';
 
 export type IntegrationPlatform =
+	| 'acronis'
+	| 'admin-by-request'
+	| 'agger-labs'
+	| 'anthropic'
 	| 'aws'
+	| 'axonius'
+	| 'bitwarden'
 	| 'box'
+	| 'checkpoint-firewall'
 	| 'checkpoint-harmony'
 	| 'cisco-catalyst'
 	| 'cisco-duo'
 	| 'cisco-meraki'
+	| 'cisco-secure-access'
 	| 'cisco-umbrella'
 	| 'connectwise-psa'
 	| 'crowdstrike-falcon'
+	| 'cyberark'
+	| 'darktrace'
+	| 'dfir-iris'
 	| 'email'
+	| 'exium'
+	| 'fleet-dm'
 	| 'fortianalyzer'
 	| 'fortinet'
+	| 'freshservice'
 	| 'generic-json'
 	| 'generic-syslog'
+	| 'github'
 	| 'google-alert-center'
+	| 'google-chronicle'
 	| 'google-directory'
 	| 'google-security-center'
+	| 'halcyon'
+	| 'halo-itsm'
 	| 'have-i-been-pwned'
+	| 'horizon3'
 	| 'hyas-protect'
 	| 'ipinfo'
 	| 'jamf-pro'
 	| 'jamf-protect'
 	| 'jira-cloud'
 	| 'jira-data-center'
+	| 'jumpcloud'
 	| 'kandji'
 	| 'manage-engine-ad-audit-plus'
 	| 'microsoft'
 	| 'microsoft-entra'
 	| 'microsoft-teams'
+	| 'microsoft-teams-v2'
 	| 'mimecast'
+	| 'netskope'
+	| 'ninjaone'
+	| 'odoo-helpdesk'
 	| 'okta'
 	| 'one-password'
+	| 'onelogin'
+	| 'openai'
 	| 'orca-security'
+	| 'pager-duty'
+	| 'palo-alto-networks-cortex'
+	| 'palo-alto-ngfw'
+	| 'perception-point'
+	| 'picus'
+	| 'ping-one'
 	| 'reversing-labs'
 	| 'safebreach'
+	| 'sandfly'
 	| 'sentinel-one'
+	| 'service-now'
 	| 'slack'
 	| 'sms'
+	| 'smtp'
+	| 'sonic-wall'
+	| 'sophos'
+	| 'splunk'
+	| 'stairwell'
+	| 'tenable-nessus'
 	| 'thinkst-canary'
+	| 'tracebit'
+	| 'unifi'
 	| 'vectra'
+	| 'watchguard-firebox'
 	| 'windows-event-logs'
 	| 'wirespeed'
 	| 'wiz'
-	| 'wordfence';
+	| 'wordfence'
+	| 'zabbix'
+	| 'zscaler-zpa';
+
+export type DetectionCategory =
+	| 'OTHER__DIAGNOSTIC'
+	| 'OTHER__INFORMATIONAL_EVENT'
+	| 'OTHER__WARNING'
+	| 'OTHER__UNKNOWN'
+	| 'OTHER__DECEPTION'
+	| 'OTHER__DECEPTION__SIMULATION'
+	| 'OTHER__CUSTOM_DETECTION'
+	| 'CLOUD__INVOCATION'
+	| 'CLOUD__DISCOVERY'
+	| 'CLOUD__DATA_TRANSFER'
+	| 'CLOUD__PERSISTENCE'
+	| 'CLOUD__PUBLIC_BUCKET'
+	| 'ENDPOINT__DISCOVERY'
+	| 'ENDPOINT__EXECUTION'
+	| 'ENDPOINT__LIVE_OFF_THE_LAND'
+	| 'ENDPOINT__NUISANCE'
+	| 'ENDPOINT__MALWARE_DISCOVERY'
+	| 'ENDPOINT__MALWARE_EXECUTION'
+	| 'ENDPOINT__LATE_STAGE'
+	| 'ENDPOINT__PERSISTENCE'
+	| 'ENDPOINT__REMOTE_MANAGEMENT'
+	| 'ENDPOINT__LATERAL_MOVEMENT'
+	| 'ENDPOINT__IMPACT'
+	| 'ENDPOINT__EVASION'
+	| 'ENDPOINT__EXPLOITATION'
+	| 'ENDPOINT__SIMULATION'
+	| 'ENDPOINT__PLANNED_CHANGE'
+	| 'IDENTITY__LOGIN'
+	| 'IDENTITY__REJECTED_MFA'
+	| 'IDENTITY__DISCOVERY'
+	| 'IDENTITY__BRUTE_FORCE'
+	| 'IDENTITY__PUBLIC_CREDENTIAL_EXPOSURE'
+	| 'IDENTITY__PRIVATE_CREDENTIAL_EXPOSURE'
+	| 'IDENTITY__PERSISTENCE'
+	| 'IDENTITY__ACCOUNT_COMPROMISE'
+	| 'IDENTITY__OAUTH_GRANT'
+	| 'IDENTITY__SIMULATION'
+	| 'NETWORK__INBOUND_CONNECTION'
+	| 'NETWORK__OUTBOUND_CONNECTION'
+	| 'NETWORK__PHISHING'
+	| 'NETWORK__NOISY'
+	| 'NETWORK__DISCOVERY'
+	| 'EMAIL__PHISHING'
+	| 'EMAIL__PHISHING_REPORTED'
+	| 'EMAIL__EVASION'
+	| 'EMAIL__MALWARE'
+	| 'EMAIL__MALICIOUS_LINK'
+	| 'EMAIL__GRAYMAIL'
+	| 'EMAIL__SPAM'
+	| 'EMAIL__BUSINESS_EMAIL_COMPROMISE'
+	| 'EMAIL__MAILBOX_RULE'
+	| 'DATA__DATA_TRANSFER'
+	| 'DATA__DATA_SHARE'
+	| 'POSTURE__POSTURE'
+	| 'POSTURE__HEALTH';
 
 export interface IntegrationActionV2 {
 	slug: string;
 	display: string;
 	description: string;
 	useCases: UseCase[];
+	showWebhookSecret?: boolean;
+	containmentRequirements?: Record<string, unknown>;
 }
 
 export interface IntegrationMetadataConfigV2 {
-	authType: 'oauth2' | 'api_token' | 'basic' | 'other';
+	authType: 'oauth2' | 'api_token' | 'basic' | 'custom' | 'none' | 'multi';
+	authMethods?: IntegrationMetadataConfigAuthMethodV2[];
 	name: string;
 	oauthRequiresRedirect?: boolean;
 	customFields: IntegrationMetadataConfigCustomFieldV2[];
 	requiresConfiguration?: boolean;
+	requiresWebhook?: boolean;
 	logo: string;
-	logoLight: string;
-	logoDark: string;
+	logoLight?: string;
+	logoDark?: string;
 	beta: boolean;
-	description: string;
+	description?: string;
 	slug: string;
-	internalCreds: boolean;
-	docsUrl: string;
+	internalCreds?: boolean;
+	docsUrl?: string;
+	statusUrl?: string;
 	default: boolean;
-	rtfm: boolean;
+	rtfm?: boolean;
 	useCases: UseCase[];
+	integrationTypes?: (
+		| 'collaboration'
+		| 'endpoint'
+		| 'identity'
+		| 'network_vpn'
+		| 'cloud'
+		| 'siem'
+		| 'saas'
+		| 'attack_simulation'
+		| 'deception'
+		| 'enrichment'
+		| 'email'
+		| 'firewall'
+		| 'dns'
+		| 'custom'
+		| 'ai'
+	)[];
+	actions?: IntegrationActionV2[];
 	webhookActions: IntegrationActionV2[];
+	containmentActions: IntegrationActionV2[];
 	singleInstallOnly?: boolean;
+	hideFromCatalog?: boolean;
+	comingSoon?: boolean;
+	serviceProviderCompatible?: boolean;
+	syslogListenerTypes?: ('socket' | 'http' | 'https')[];
+	syslogDefaultFraming?: SyslogDefaultFramingV2;
 }
 
 export interface IntegrationV2 {
@@ -199,15 +365,14 @@ export interface IntegrationV2 {
 	teamName?: string;
 	config: IntegrationMetadataConfigV2;
 	permissionsUpdateAvailable: boolean;
-	permissionUpdateExplanation: string;
-	requiresConfiguration?: string;
+	permissionUpdateExplanation: string | null;
+	requiresConfiguration?: boolean;
 	identityFields: Record<string, unknown>;
 	muteHourlyQuality?: Record<string, unknown>;
 }
 
 export interface IntegrationSearch {
 	data: IntegrationV2[];
-	totalCount: number;
 }
 
 export interface IntegrationSearchDto {
@@ -233,11 +398,12 @@ export interface CaseSeverityStat {
 }
 
 export interface TimeAverageAndChange {
-	average: number | string;
+	average: number | null;
 	unit: 'seconds' | 'milliseconds';
-	change: number;
+	change?: number;
 }
 
+// Local aggregate used to render reports from the separate statistics endpoints.
 export interface TeamStatistics {
 	escalatedDetections: number;
 	totalDetections: number;
@@ -260,20 +426,16 @@ export interface TeamStatistics {
 	ocsfStatistics: TeamOCSFStatistic[];
 }
 
-export interface PlatformLogoResponse {
-	platformLogo: string;
-	platformLogoLight: string;
-	platformLogoDark: string;
-}
-
-export interface SearchCasesDto {
-	size?: number;
-	page?: number;
-	filter?: string;
-	search?: string;
-	orderBy?: string;
-	orderDir?: 'asc' | 'desc';
-	statuses?: string[];
+export interface SearchCasesDto extends PaginationDto, ReportPeriodDto {
+	statuses?: (
+		| 'NEW'
+		| 'PROCESSING'
+		| 'ESCALATED'
+		| 'HUNTING'
+		| 'MONITORING'
+		| 'CHATOPS'
+		| 'CLOSED'
+	)[];
 	verdict?: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
 	assetId?: string;
 	severity?: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -290,8 +452,9 @@ export interface SearchCasesDto {
 	onlyWasEscalated?: boolean;
 	onlyWasContained?: boolean;
 	onlyWasMobile?: boolean;
+	onlyWasMonitored?: boolean;
 	onlyChatOps?: boolean;
-	integrationPlatform?: string;
+	integrationPlatform?: IntegrationPlatform;
 	hideDemoClients?: boolean;
 	categoryClass?:
 		| 'ENDPOINT'
@@ -302,13 +465,9 @@ export interface SearchCasesDto {
 		| 'DATA'
 		| 'POSTURE'
 		| 'OTHER';
-	category?: string;
-	createdAt?: {
-		gt?: string;
-		gte?: string;
-		lt?: string;
-		lte?: string;
-	};
+	category?: DetectionCategory;
+	createdAt?: DateFilterDto;
+	groupIds?: string[];
 }
 
 export interface JSONLog {
@@ -322,10 +481,10 @@ export interface Case {
 	sid: string;
 	teamId: string;
 	name?: string;
-	lastNotifiedClientAt: object;
+	lastNotifiedClientAt?: string | null;
 	status: 'NEW' | 'PROCESSING' | 'ESCALATED' | 'HUNTING' | 'MONITORING' | 'CHATOPS' | 'CLOSED';
 	createdAt: string;
-	detectionSids?: string[];
+	detectionSids: string[];
 	testMode: boolean;
 	firstDetectionSourceIngestedAt: string;
 	firstDetectionSourceDetectedAt: string;
@@ -335,33 +494,35 @@ export interface Case {
 	contained: boolean;
 	reingested: boolean;
 	verdict: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	helpfulnessRating?: 'happy' | 'neutral' | 'unhappy' | null;
 	title: string;
-	categories: string[];
+	categories?: DetectionCategory[];
 	excludeFromMeans: boolean;
 	verdictedAt?: string;
 	detectionCount?: number;
 	firstRun: boolean;
-	mttr?: number;
+	timeToClose?: number;
 	teamName?: string;
 	containsVIP: boolean;
 	containsHVA: boolean;
 	containsMobile: boolean;
 	externalTicketId?: string;
 	externalTicketIntegrationId?: string;
-	autoContained: boolean;
-	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+	autoContained?: boolean;
+	severity: string;
 	severityOrdinal: number;
 	respondedAt?: string;
 	platforms?: string[];
 	notes?: string;
-	clientNotified: boolean;
+	clientNotified?: boolean;
 	summary?: string;
 	hasPassedAql?: boolean;
+	groups?: string | null;
+	groupSummaries?: GroupSummary[];
 }
 
 export interface Cases {
 	data: Case[];
-	totalCount: number;
 }
 
 export interface Endpoint {
@@ -377,26 +538,36 @@ export interface Endpoint {
 	privateIpAddress?: string;
 	live?: boolean;
 	operatingSystem?: string;
-	integrationId: object;
+	operatingSystemCategory?:
+		| 'Windows'
+		| 'Windows Server'
+		| 'macOS'
+		| 'Linux'
+		| 'iOS'
+		| 'Android'
+		| 'ChromeOS'
+		| 'Network Device'
+		| 'Other';
+	integrationId: string | null;
+	canonicalId?: string | null;
+	canonicalClusterMemberCount?: number | null;
+	canonicalClusterMembers?: CanonicalAssetClusterMemberDto[] | null;
 	contained: boolean;
 	managed?: boolean;
 	publicIpAddress?: string;
 	workstation: boolean;
 	server: boolean;
 	mobile: boolean;
+	domainController: boolean;
+	lastSeenAt?: string;
 	updatedAt?: string;
-	raw?: object;
-}
-
-export interface DirectoryUserTagDTO {
-	id: string;
-	directoryUserId: string;
-	tag: 'VIP' | 'ADMIN' | 'TECHNICAL' | 'FINANCIAL' | 'NHI';
-	automationId: string;
-	teamId: string;
-	overriddenByUser: boolean;
-	enabled: boolean;
-	createdAt: string;
+	raw?: Record<string, unknown>;
+	groups: EndpointGroupDTO[];
+	groupContainmentEnabled: boolean;
+	groupChatOpsEnabled: boolean;
+	groupSourceSystemUpdates: boolean;
+	groupsSynced: boolean;
+	lockPin?: string | null;
 }
 
 export interface DirectoryUser {
@@ -410,37 +581,51 @@ export interface DirectoryUser {
 	previousPhoneNumber?: string;
 	title?: string;
 	email?: string;
-	additionalEmails?: string[];
+	additionalEmails: string[];
 	allEmails: string[];
 	vip?: boolean;
 	nhi?: boolean;
 	financial?: boolean;
 	technical?: boolean;
+	external?: boolean;
 	managerDirectoryId?: string;
 	managerEmail?: string;
 	domain?: string;
 	department?: string;
 	createdAt: string;
-	integrationId: object;
-	roles: string[];
-	lastCredentialExposure?: object;
+	integrationId: string | null;
+	canonicalId?: string | null;
+	canonicalClusterMemberCount?: number | null;
+	canonicalClusterMembers?: CanonicalAssetClusterMemberDto[] | null;
+	roles?: string[] | null;
+	lastCredentialExposure?: string | null;
 	credentialsExposed: boolean;
 	numberCredentialExposures: number;
-	lastCheckedForCredentialExposures?: object;
+	lastCheckedForCredentialExposures?: string | null;
 	needsChatOpsWelcome?: boolean;
 	contained?: boolean;
 	username?: string;
+	/** @deprecated use isUserContainable logic in the containment dialog instead. This is just an alias to user.managed */
 	containable: boolean;
-	smsConsentReceivedAt?: object;
+	smsConsentReceivedAt?: string | null;
+	smsInviteAttempts: number;
+	smsInviteLastSentAt?: string;
+	smsInviteOptOut?: boolean;
 	administrator?: boolean;
 	updatedAt?: string;
 	passwordLastChangedAt?: string;
 	lastSignInAt?: string;
-	raw?: object;
-	tags: DirectoryUserTagDTO[];
+	raw?: Record<string, unknown>;
+	groups: DirectoryUserGroupDTO[];
+	licenses: DirectoryUserLicense[];
 	managed?: boolean;
 	chatOpsOnboardingUser?: boolean;
+	groupContainmentEnabled: boolean;
+	groupChatOpsEnabled: boolean;
+	groupSourceSystemUpdates: boolean;
+	groupsSynced: boolean;
 	verifiedPhoneNumber?: string;
+	emailDirection?: 'sender' | 'receiver';
 }
 
 export interface Process {
@@ -474,9 +659,6 @@ export interface Location {
 	continent?: string;
 	continentCode?: string;
 	createdAt: string;
-	known: boolean;
-	safe?: boolean;
-	detectionSid?: string;
 }
 
 export interface ThreatName {
@@ -586,7 +768,7 @@ export interface IPInfoMetadataImpl {
 export interface IP {
 	ipv4?: string;
 	ipv6?: string;
-	metadata: IPInfoMetadataImpl;
+	metadata?: IPInfoMetadataImpl;
 	displayName: string;
 	id: string;
 	teamId: string;
@@ -594,9 +776,6 @@ export interface IP {
 	updatedAt: string;
 	locationId?: string;
 	metadataLastFetchedAt: string;
-	known: boolean;
-	safe?: boolean;
-	detectionSid?: string;
 }
 
 export interface UserAgent {
@@ -636,15 +815,17 @@ export interface DateFilterDto {
 	lte?: string;
 }
 
-export interface SearchDetectionsDto {
-	size?: number;
-	page?: number;
-	filter?: string;
-	search?: string;
-	orderBy?: string;
-	orderDir?: 'asc' | 'desc';
+export interface SearchDetectionsDto extends PaginationDto, ReportPeriodDto {
 	caseIdOrSid?: string;
-	statuses?: string[];
+	statuses?: (
+		| 'NEW'
+		| 'PROCESSING'
+		| 'ESCALATED'
+		| 'HUNTING'
+		| 'MONITORING'
+		| 'CHATOPS'
+		| 'CLOSED'
+	)[];
 	verdict?: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
 	assetId?: string;
 	assetType?:
@@ -670,11 +851,12 @@ export interface SearchDetectionsDto {
 		| 'DATA'
 		| 'POSTURE'
 		| 'OTHER';
-	category?: string;
+	category?: DetectionCategory;
 	exclusionId?: string;
 	severity?: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-	integrationPlatform?: string;
+	integrationPlatform?: IntegrationPlatform;
 	createdAt?: DateFilterDto;
+	groupIds?: string[];
 }
 
 export interface VerdictRule {
@@ -716,10 +898,18 @@ export interface Detection {
 	sourceDescription?: string;
 	notes?: string;
 	sourceName?: string;
-	description?: string;
 	status: 'NEW' | 'PROCESSING' | 'ESCALATED' | 'HUNTING' | 'MONITORING' | 'CHATOPS' | 'CLOSED';
 	createdAt: string;
-	containments: string[];
+	containments: (
+		| 'USER'
+		| 'PROCESS'
+		| 'USER_AGENT'
+		| 'FILE'
+		| 'ENDPOINT'
+		| 'LOCATION'
+		| 'IP'
+		| 'DOMAIN'
+	)[];
 	testMode: boolean;
 	caseId?: string;
 	sourceIngestedAt: string;
@@ -728,29 +918,36 @@ export interface Detection {
 	updatedAt?: string;
 	closedAt?: string;
 	logs: JSONLog[];
-	raw: Record<string, any>;
+	raw: Record<string, unknown>;
+	refreshRaw?: Record<string, unknown>;
+	lastRefreshAt?: string;
 	verdict: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	helpfulnessRating?: 'happy' | 'neutral' | 'unhappy' | null;
 	title: string;
-	integrationPlatform: string;
+	integrationPlatform: IntegrationPlatform;
 	integrationId?: string;
 	duplicateDetectionId?: string;
 	contained: boolean;
 	nextSteps?: string;
 	reingested: boolean;
 	prevented: boolean;
+	managedByThirdParty: boolean;
 	excludeFromMeans: boolean;
 	caseSid?: string;
 	sid: string;
 	firstRun: boolean;
 	containOnChatOpsFailure: boolean;
 	wasEscalated: boolean;
-	ocsfDetectionFinding: Record<string, any>;
+	alwaysNotifyApplied: boolean;
+	escalatedAt?: string;
+	ocsfDetectionFinding: Record<string, unknown>;
+	sourceUrl?: string | null;
 	actionSlug?: string;
 	exclusionId?: string;
 	exclusionSid?: string;
 	autoClosed?: boolean;
 	autoContained?: boolean;
-	category: string;
+	category: DetectionCategory;
 	verdictSetting?: VerdictRule;
 	chatOpsTest: boolean;
 	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -761,16 +958,254 @@ export interface Detection {
 	chatOpsTestEmail?: string;
 	chatOpsTestPhoneNumber?: string;
 	customDetectionId?: string;
+	externalCustomDetectionId?: string;
+	autoRemediateStartedAt?: string;
+	remediatedAt?: string;
 }
 
-export interface Detections {
-	data: Detection[];
+export type Detections = DetectionsList;
+
+export interface DetectionCategoryClassStat {
+	categoryClass: string;
+	displayName: string;
+	count: number;
+	percentage: number;
+}
+
+export interface TeamDetectionStatistics {
+	totalDetections: number;
+	historicDetections: number;
+	escalatedDetections: number;
+	containmentDetections: number;
+	chatOpsDetections: number;
+	automaticallyClosed: number;
+	potentialChatOpsDetections: number;
+	potentialContainmentDetections: number;
+	potentialEscalatedDetections: number;
+	verdictedMalicious: number;
+	confirmedMalicious: number;
+	truePositiveDetections: number;
+	falsePositiveDetections: number;
+}
+
+export interface TeamResourceStatistics {
+	billableUsers: number;
+	billableEndpoints: number;
+	billableUsersSource: 'license' | 'derived';
+	billableEndpointsSource: 'license' | 'derived';
+	totalUserSeats: number | null;
+	totalEndpointSeats: number | null;
+}
+
+export interface TeamEventStatistics {
+	totalEvents: number;
+	totalBytes: number;
+	allTimeTotalEvents: number;
+	allTimeTotalBytes: number;
+	ocsfStatistics: TeamOCSFStatistic[];
+}
+
+export interface CasesCountResponse {
 	totalCount: number;
 }
 
-export interface DetectionCategoryClassStat {
-    categoryClass: string;
-    displayName: string;
-    count: number;
-    percentage: number;
+export interface EndpointSearchDto {
+	size?: number;
+	page?: number;
+	filter?:
+		| 'name'
+		| 'OS'
+		| 'ip'
+		| 'edr_id'
+		| 'mdm_id'
+		| 'integration_source_id'
+		| 'custom_attribute';
+	search?: string;
+	orderBy?: string;
+	orderDir?: 'asc' | 'desc';
+	hvaOnly?: boolean;
+	onlyContained?: boolean;
+	userId?: string;
+	showUnmanagedEndpoints?: boolean;
+	operatingSystemCategories?: (
+		| 'Windows'
+		| 'Windows Server'
+		| 'macOS'
+		| 'Linux'
+		| 'iOS'
+		| 'Android'
+		| 'ChromeOS'
+		| 'Network Device'
+		| 'Other'
+	)[];
+	onlyLive?: boolean;
+	integrationIds?: string[];
+	groupIds?: string[];
+	groupFilterOperator?: 'and' | 'or';
+	searchAttributeKey?: string;
+	caseSensitive?: boolean;
+	dedupeCanonicalRoots?: boolean;
+	onlyCanonicalClustersWithDuplicates?: boolean;
+	teamId?: string;
+	canonicalClusterOfEndpointId?: string;
+}
+
+export interface EndpointSearchPage {
+	data: EndpointSearch[];
+	totalCount: number;
+}
+
+export interface EndpointSearchCountResponse {
+	totalCount: number;
+}
+
+export interface CanonicalAssetClusterMemberDto {
+	id: string;
+	displayLabel: string;
+	integrationId: string | null;
+	integrationPlatform?: IntegrationPlatform | null;
+	name?: string | null;
+	username?: string | null;
+	email?: string | null;
+	additionalEmails?: string[] | null;
+	roles?: string[] | null;
+	title?: string | null;
+	department?: string | null;
+	managed?: boolean | null;
+	enabled?: boolean | null;
+	createdAt?: string | null;
+	updatedAt?: string | null;
+	live?: boolean | null;
+	operatingSystem?: string | null;
+	privateIpAddress?: string | null;
+	publicIpAddress?: string | null;
+}
+
+export interface EndpointGroupDTO {
+	id: string;
+	endpointId: string;
+	group: string;
+	teamId: string;
+	enabled: boolean;
+	createdAt: string;
+	overriddenByUser: boolean;
+	overriddenByUserId?: string;
+	overriddenByUserIdentifier?: string | null;
+	groupId: string;
+	groupName?: string;
+	groupSlug?: string;
+	groupContainmentEnabled?: boolean;
+	groupChatOpsEnabled?: boolean;
+	groupSourceSystemUpdates?: boolean;
+	groupAlwaysNotify?: boolean;
+	groupRuleSearch?: string;
+	groupRuleSearchField?: string;
+	groupRuleSearchType?: 'text' | 'regexp';
+}
+
+export interface DirectoryUserGroupDTO {
+	id: string;
+	directoryUserId: string;
+	group: string;
+	teamId: string;
+	overriddenByUser: boolean;
+	overriddenByUserId: string | null;
+	overriddenByUserIdentifier: string | null;
+	enabled: boolean;
+	createdAt: string;
+	groupId: string;
+	groupName?: string;
+	groupSlug?: string;
+	groupContainmentEnabled?: boolean;
+	groupChatOpsEnabled?: boolean;
+	groupSourceSystemUpdates?: boolean;
+	groupAlwaysNotify?: boolean;
+	groupRuleSearch?: string;
+	groupRuleSearchField?: string;
+	groupRuleSearchType?: 'text' | 'regexp';
+}
+
+export interface DirectoryUserLicense {
+	licenseId: string;
+	licenseName: string;
+	productId: string | null;
+	integrationPlatform: IntegrationPlatform;
+}
+
+export interface GroupSummary {
+	id: string;
+	name: string;
+	color?:
+		| 'gray'
+		| 'red'
+		| 'orange'
+		| 'amber'
+		| 'green'
+		| 'teal'
+		| 'blue'
+		| 'indigo'
+		| 'purple'
+		| 'pink'
+		| null;
+}
+
+export interface DetectionListItem {
+	id: string;
+	teamId: string;
+	sid: string;
+	teamName?: string;
+	integrationPlatform: IntegrationPlatform;
+	sourceName?: string;
+	severityOrdinal: number;
+	severity: 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+	category: DetectionCategory;
+	status: 'NEW' | 'PROCESSING' | 'ESCALATED' | 'HUNTING' | 'MONITORING' | 'CHATOPS' | 'CLOSED';
+	verdict: 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN';
+	sourceDetectedAt: string;
+	caseSid?: string;
+	containsVIP: boolean;
+	containsHVA: boolean;
+	exclusionId?: string;
+	excluded: boolean;
+	createdAt: string;
+	testMode: boolean;
+	reingested: boolean;
+	groupSummaries: GroupSummary[];
+}
+
+export interface DetectionsList {
+	data: DetectionListItem[];
+}
+
+export interface EndpointSearch extends Endpoint {
+	integrationPlatform: string;
+	teamName?: string | null;
+	canonicalClusterSearchMatchMemberId?: string | null;
+}
+
+export interface DetectionWithEntities extends Detection {
+	endpoints: Endpoint[];
+	files: File[];
+	processes: Process[];
+	locations: Location[];
+	directory: DirectoryUser[];
+	ips: IP[];
+	domains: Domain[];
+	fileRisk: File['fileRisk'];
+	userAgents?: UserAgent[];
+	whatHappened: string;
+	groups?: string | null;
+	groupNames: string[];
+}
+
+export interface IntegrationMetadataConfigAuthMethodV2 {
+	id?: string;
+	displayName?: string;
+	description?: string;
+	authType: 'oauth2' | 'api_token' | 'basic' | 'custom' | 'none';
+}
+
+export interface SyslogDefaultFramingV2 {
+	method: 'octet_counting' | 'character_delimited';
+	delimiter?: string;
 }

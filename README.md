@@ -73,6 +73,18 @@ The project is optimized for deployment on Cloudflare's edge network.
    npm run deploy
    ```
 
+## Wirespeed API compatibility
+
+The server client follows the [public v1 OpenAPI contract](https://api.wirespeed.co/v1/openapi.json), retrieved on September 14, 2026. Requests use `https://api.wirespeed.co/v1` and Bearer authentication. Pagination starts at page 1, as required by the API, without relying on the removed `totalCount` field.
+
+- Reporting-period statistics and searches retain UTC ISO timestamps and date filters.
+- Billable resources and OS counts reflect current inventory. OS counts come from endpoint count filters.
+- Service provider branding uses the team's `logoUrl`.
+- Asset rankings use detection details across all search pages. Login locations count each country once per `IDENTITY__LOGIN` detection with a `SUSPICIOUS` or `MALICIOUS` verdict; the former geography summary endpoint is no longer used.
+- MTTR measures verdict to remediation; MTTC measures remediation (or verdict) to closure. Missing averages display `N/A`.
+
+Run `npm test` with Node.js 22.18+ (or Node.js 24+) for mocked API contract and report generation tests. Run `npm run check` and `npm run build` for type and production build validation. Tests do not require an API key; live report generation does.
+
 ## 📖 Usage
 
 1. **Authentication**: Enter your Wirespeed API key in the configuration sidebar.

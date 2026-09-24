@@ -75,9 +75,9 @@
 
             <div class="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 text-center relative overflow-hidden group flex flex-col justify-center items-center">
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
-                <p class="text-foreground/40 text-[9px] uppercase font-black mb-2 tracking-[0.2em]">MTTC</p>
-                <p class="text-2xl font-black text-primary tracking-tighter">{data.meanTimeMetrics.mttc || "N/A"}</p>
-                <p class="text-foreground/50 text-[8px] mt-2 font-bold uppercase tracking-widest italic">Mean Time To Contain</p>
+                <p class="text-foreground/40 text-[9px] uppercase font-black mb-2 tracking-[0.2em]">MTTR</p>
+                <p class="text-2xl font-black text-primary tracking-tighter">{data.meanTimeMetrics.mttr}</p>
+                <p class="text-foreground/50 text-[8px] mt-2 font-bold uppercase tracking-widest italic">Mean Time To Remediate</p>
             </div>
 
             <!-- Arrow -->
@@ -89,9 +89,9 @@
 
             <div class="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 text-center relative overflow-hidden group flex flex-col justify-center items-center">
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
-                <p class="text-foreground/40 text-[9px] uppercase font-black mb-2 tracking-[0.2em]">MTTR</p>
-                <p class="text-2xl font-black text-primary tracking-tighter">{data.meanTimeMetrics.mttr}</p>
-                <p class="text-foreground/50 text-[8px] mt-2 font-bold uppercase tracking-widest italic">Mean Time To Respond</p>
+                <p class="text-foreground/40 text-[9px] uppercase font-black mb-2 tracking-[0.2em]">MTTC</p>
+                <p class="text-2xl font-black text-primary tracking-tighter">{data.meanTimeMetrics.mttc}</p>
+                <p class="text-foreground/50 text-[8px] mt-2 font-bold uppercase tracking-widest italic">Mean Time To Close</p>
             </div>
         </div>
     </ReportSection>

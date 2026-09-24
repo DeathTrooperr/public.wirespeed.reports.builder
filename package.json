@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"scripts": {
 		"dev": "vite dev",
+		"test": "node --test test/*.test.ts",
 		"build": "vite build && npm run prepack",
 		"preview": "npm run build && wrangler dev",
 		"prepare": "svelte-kit sync || echo ''",

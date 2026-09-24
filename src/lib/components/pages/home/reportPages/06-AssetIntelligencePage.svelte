@@ -18,6 +18,7 @@
         flexGrow={true}
     >
     <!-- DEVICE OVERVIEW -->
+    <p class="text-[10px] text-foreground/50 mb-3">Current endpoint inventory by operating system</p>
     <div class="grid grid-cols-5 gap-6 mb-6">
         <div class="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-sm relative overflow-hidden group">
             <div class="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
@@ -133,6 +134,7 @@
             <svg class="w-3.5 h-3.5 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             Suspicious Login Locations
         </h3>
+        <p class="text-[10px] text-foreground/50 mb-3">Countries linked to suspicious or malicious login detections during this reporting period.</p>
         <div class="grid grid-cols-2 gap-4">
             {#each data.suspiciousLoginLocations as item}
                 <div class="group relative bg-white px-4 py-3 rounded-xl border border-gray-100 transition-all shadow-sm hover:shadow-md flex items-center gap-4 overflow-hidden">
@@ -147,7 +149,7 @@
             {/each}
             {#if data.suspiciousLoginLocations.length === 0}
                 <div class="col-span-2 py-12 text-center bg-gray-50/30 rounded-2xl border border-dashed border-gray-200">
-                    <p class="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] italic">No suspicious login activity detected</p>
+                    <p class="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] italic">No locations reported for suspicious or malicious logins</p>
                 </div>
             {/if}
         </div>
